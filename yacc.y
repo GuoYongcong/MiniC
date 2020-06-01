@@ -67,7 +67,7 @@ struct Node * treeRoot = 0;
 program : declaration_list {treeRoot=createSyntaxTreeNode(program, 0,$1,0,0);}
         ;
 declaration_list : declaration_list declaration {$$=createSyntaxTreeNode(declarationList, 0, $1, $2,0);}
-         | expression {$$=$1;}
+                 | expression {$$=$1;}
                  | declaration {$$=$1;}
                  ;
 declaration : var_declaration {$$=$1;}
@@ -105,10 +105,10 @@ param : tpye_specifier ID {
       ;
 compound_stmt : LC local_declaration statement_list RC {$$=createSyntaxTreeNode(compoundStmt, 0,$2, $3,0); }
               ;
-local_declaration : local_declaration var_declaration {$$=createSyntaxTreeNode(localDeclaration, 0, $1, $2,0); }
+local_declaration : local_declaration var_declaration {$$=createSyntaxTreeNode(localDeclaration, 0,$1, $2,0); }
                   | {$$=0;}
                   ;
-statement_list : statement_list statement {$$=createSyntaxTreeNode(statementList, 0, $1, $2,0); }
+statement_list : statement_list statement {$$=createSyntaxTreeNode(statementList, 0,$1, $2,0); }
                | {$$=0;}
                ;
 statement : expression_stmt {$$=$1;}
@@ -136,7 +136,10 @@ var : ID {$$=createSyntaxTreeNode(idType, $1, 0,0,0);}
     | ID LS expression RS {$$=createSyntaxTreeNode(idType, $1,$3,0,0);}
     ;
 simple_expression : additive_expression {$$=$1;}
-                  | additive_expression relop additive_expression {$$=createSyntaxTreeNode(expressionType, 0,  $2, $1, $3);}
+                  | additive_expression relop additive_expression {
+    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3, 0);
+    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+}
                   ;
 relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | LESS { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
@@ -145,13 +148,19 @@ relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
-additive_expression : additive_expression addop term{$$=createSyntaxTreeNode(expressionType, 0, $2, $1, $3);}
+additive_expression : additive_expression addop term{
+    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3,0);
+    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+}
                     | term {$$=$1;}
                     ;
 addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
-term : term mulop factor {$$=createSyntaxTreeNode(expressionType, 0, $2, $1, $3);}
+term : term mulop factor {
+    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3, 0);
+    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+}
      | factor {$$=$1;}
      ;
 mulop : MUL {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}

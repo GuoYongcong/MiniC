@@ -3,10 +3,11 @@
 * @File name: globals.h
 * @Description: 该文件声明和定义了一些供其他文件使用的宏定义、联合体、枚举、结构体等。
 * @Author: 郭永聪
-* @Version: 1.0
+* @Version: 1.0.1
 * @Date:   2020-05-01
 * @History:
-*   <author>    <version>   <date>    <description>
+*   <author>    <version>   <date>          <description>
+*   郭永聪         1.0.1     2020-06-01       结构体Node添加了一个属性：brotherNode
 */
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
@@ -31,16 +32,16 @@ typedef enum
     ifStmt, whlieStmt, assignStmt, returnStmt, compoundStmt,
     varDeclaration, funDeclaration, funCall,  expressionType,
 	declarationList, paramList, localDeclaration, statementList,
-	argList, opType, constType, idType, typeType, program
+	argList, opType, constType, idType, typeType, program, noType
 }NodeType;
 
 //语法树结点定义
 typedef struct Node
 {
     NodeType nodeType; //结点类型
-    struct Node * childrenNode[MAXNUM]; //孩子结点
     Val attr; //结点内容
-
+    struct Node * childrenNode[MAXNUM]; //孩子结点
+    struct Node * brotherNode; //兄弟结点
 };
 
 //行号
