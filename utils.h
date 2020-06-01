@@ -13,7 +13,7 @@
 #define _UTILS_H_
 
 //创建语法树结点
-struct Node * createSyntaxTreeNode(NodeType, long long, struct Node *, struct Node *, struct Node *);
+struct Node * createSyntaxTreeNode(NodeType, char *, struct Node *, struct Node *, struct Node *);
 
 //打印语法树
 void printSyntaxTree( struct Node * );

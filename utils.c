@@ -23,7 +23,7 @@
  * @return              返回值为新创建的结点指针
  */
 struct Node * createSyntaxTreeNode(
-	NodeType nodeType, long long value,
+	NodeType nodeType, char * value,
 	struct Node * n1, struct Node * n2, struct Node * n3 )
 {
 	struct Node * t = (struct Node *)malloc(sizeof(struct Node));
@@ -34,7 +34,6 @@ struct Node * createSyntaxTreeNode(
 		t->nodeType = nodeType;
 		t->attr.ch = value;
 		int i;
-
 		t->childrenNode[0] = n1;
 		t->childrenNode[1] = n2;
 		t->childrenNode[2] = n3;
@@ -59,7 +58,7 @@ static void printSpaces(void)
     fprintf(yyout," ");
 }
 /**
- * 18个打印不同类型结点内容的函数
+ * 19个打印不同类型结点内容的函数
  * @param  tree     语法树的某个结点
  */
 void fun_ifStmt(struct Node * tree){ fprintf(yyout,"If\n"); }
@@ -84,13 +83,16 @@ void fun_constType(struct Node * tree){ fprintf(yyout,"Const: %d\n", tree->attr.
 void fun_idType(struct Node * tree){ fprintf(yyout,"Id: %s\n", tree->attr.ch); }
 void fun_typeType(struct Node * tree){ fprintf(yyout,"Type: %s\n", tree->attr.ch); }
 
+void fun_program(struct Node * tree){ fprintf(yyout,"program: \n"); }
+
+
 //函数指针数组
 void (*funs[])(struct Node *) =
 {
     fun_ifStmt, fun_whlieStmt, fun_assignStmt, fun_returnStmt,fun_compoundStmt,
     fun_varDeclaration, fun_funDeclaration, fun_funCall, fun_expressionType,
 	fun_declarationList, fun_paramList, fun_localDeclaration, fun_statementList,
-	fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType
+	fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType, fun_program
 };
 
 /**
@@ -105,7 +107,7 @@ void printTree( struct Node * tree )
     if (tree != NULL) 
     {
         printSpaces();
-        if(tree->nodeType >= ifStmt && tree->nodeType <= typeType)
+        if(tree->nodeType >= ifStmt && tree->nodeType <= program)
             funs[tree->nodeType](tree); //根据nodeType直接调用相应的打印结点函数
         else fprintf(yyout,"Unknown node type\n");
         for (i=0;i<MAXNUM;i++)

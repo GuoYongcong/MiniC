@@ -14,12 +14,14 @@
 #include <stdio.h>
 #include <string.h>
 #include "globals.h"
+#include "utils.h"
+
 //打印语法错误
 void yyerror(const char *str);
 //行号
 extern int yylineno;
 //语法树根结点
-struct Node * treeRoot = NULL; 
+struct Node * treeRoot = 0; 
 %}
 %union{ 
     int value;
@@ -62,9 +64,9 @@ struct Node * treeRoot = NULL;
 /**
  * 定义 Mini C BNF 语法，以及构建语法树
  */
-program : declaration_list {treeRoot=createSyntaxTreeNode(declarationList, NULL,$1,NULL,NULL);}
+program : declaration_list {treeRoot=createSyntaxTreeNode(program, 0,$1,0,0);}
         ;
-declaration_list : declaration_list declaration {$$=createSyntaxTreeNode(declarationList, NULL, $1, $2,NULL);}
+declaration_list : declaration_list declaration {$$=createSyntaxTreeNode(declarationList, 0, $1, $2,0);}
          | expression {$$=$1;}
                  | declaration {$$=$1;}
                  ;
@@ -72,42 +74,42 @@ declaration : var_declaration {$$=$1;}
             | fun_declaration {$$=$1;}
             ;
 var_declaration : tpye_specifier ID SEM {
-                    struct Node * n1=createSyntaxTreeNode(idType, $2, NULL,NULL,NULL);
-                    $$=createSyntaxTreeNode(varDeclaration, NULL, $1, n1,NULL);
+                    struct Node * n1=createSyntaxTreeNode(idType, $2, 0,0,0);
+                    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1,0);
 }
                 | tpye_specifier ID LS NUM RS SEM {
-                    struct Node * n1=createSyntaxTreeNode(idType, $2, NULL,NULL,NULL);
-                    struct Node * n2=createSyntaxTreeNode(constType, $4, NULL,NULL,NULL);
-                    $$=createSyntaxTreeNode(varDeclaration, NULL, $1, n1, n2);
+                    struct Node * n1=createSyntaxTreeNode(idType, $2, 0,0,0);
+                    struct Node * n2=createSyntaxTreeNode(constType, $4, 0,0,0);
+                    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1, n2);
 }
                 ;
-tpye_specifier : INT {$$=createSyntaxTreeNode(typeType, $1, NULL,NULL,NULL); }
-               | VOID {$$=createSyntaxTreeNode(typeType, $1, NULL,NULL,NULL);}
+tpye_specifier : INT {$$=createSyntaxTreeNode(typeType, $1, 0,0,0); }
+               | VOID {$$=createSyntaxTreeNode(typeType, $1, 0,0,0);}
                ;
 fun_declaration : tpye_specifier ID LP params RP compound_stmt {$$=createSyntaxTreeNode(funDeclaration, $2, $1, $4, $6);}
                 ;
 params : param_list {$$=$1;}
-       | VOID {$$=NULL;}
+       | VOID {$$=0;}
        ;
-param_list : param_list COM param {$$=createSyntaxTreeNode(paramList, NULL, $1, $3,NULL);}
+param_list : param_list COM param {$$=createSyntaxTreeNode(paramList, 0, $1, $3,0);}
            | param {$$=$1;}
            ;
 param : tpye_specifier ID {
-    struct Node * n1=createSyntaxTreeNode(idType, $2, NULL,NULL,NULL);
-    $$=createSyntaxTreeNode(varDeclaration, NULL, $1, n1,NULL);
+    struct Node * n1=createSyntaxTreeNode(idType, $2, 0,0,0);
+    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1,0);
 }
       | tpye_specifier ID LS RS {
-    struct Node * n1=createSyntaxTreeNode(idType, $2, NULL,NULL,NULL);
-    $$=createSyntaxTreeNode(varDeclaration, NULL,$1, n1,NULL);
+    struct Node * n1=createSyntaxTreeNode(idType, $2, 0,0,0);
+    $$=createSyntaxTreeNode(varDeclaration, 0,$1, n1,0);
 }
       ;
-compound_stmt : LC local_declaration statement_list RC {$$=createSyntaxTreeNode(compoundStmt, NULL,$2, $3,NULL); }
+compound_stmt : LC local_declaration statement_list RC {$$=createSyntaxTreeNode(compoundStmt, 0,$2, $3,0); }
               ;
-local_declaration : local_declaration var_declaration {$$=createSyntaxTreeNode(localDeclaration, NULL, $1, $2,NULL); }
-                  | {$$=NULL;}
+local_declaration : local_declaration var_declaration {$$=createSyntaxTreeNode(localDeclaration, 0, $1, $2,0); }
+                  | {$$=0;}
                   ;
-statement_list : statement_list statement {$$=createSyntaxTreeNode(statementList, NULL, $1, $2,NULL); }
-               | {$$=NULL;}
+statement_list : statement_list statement {$$=createSyntaxTreeNode(statementList, 0, $1, $2,0); }
+               | {$$=0;}
                ;
 statement : expression_stmt {$$=$1;}
           | compound_stmt {$$=$1;}
@@ -116,56 +118,56 @@ statement : expression_stmt {$$=$1;}
           | return_stmt {$$=$1;}
           ;
 expression_stmt : expression SEM {$$=$1;}
-                | SEM {$$=NULL;}
+                | SEM {$$=0;}
                 ;
-selection_stmt : IF LP expression RP statement ELSE statement {$$=createSyntaxTreeNode(ifStmt, NULL,$3, $5, $7);}
-               | IF LP expression RP statement %prec LOWER_ELSE {$$=createSyntaxTreeNode(ifStmt, NULL, $3, $5,NULL);}
+selection_stmt : IF LP expression RP statement ELSE statement {$$=createSyntaxTreeNode(ifStmt, 0,$3, $5, $7);}
+               | IF LP expression RP statement %prec LOWER_ELSE {$$=createSyntaxTreeNode(ifStmt, 0, $3, $5,0);}
                ;
-iteration_stmt : WHILE LP expression RP statement {$$=createSyntaxTreeNode(whlieStmt, NULL, $3, $5,NULL);}
+iteration_stmt : WHILE LP expression RP statement {$$=createSyntaxTreeNode(whlieStmt, 0, $3, $5,0);}
                ;
-return_stmt : RETURN expression SEM {$$=createSyntaxTreeNode(returnStmt, NULL ,$2,NULL,NULL);}
-            | RETURN SEM {$$=createSyntaxTreeNode(returnStmt, NULL, NULL,NULL,NULL);}
+return_stmt : RETURN expression SEM {$$=createSyntaxTreeNode(returnStmt, 0 ,$2,0,0);}
+            | RETURN SEM {$$=createSyntaxTreeNode(returnStmt, 0, 0,0,0);}
             ;
 
-expression : var ASSI expression {$$=createSyntaxTreeNode(assignStmt, NULL, $1, $3,NULL);}
+expression : var ASSI expression {$$=createSyntaxTreeNode(assignStmt, 0, $1, $3,0);}
            | simple_expression {$$=$1;}
            ;
-var : ID {$$=createSyntaxTreeNode(idType, $1, NULL,NULL,NULL);}
-    | ID LS expression RS {$$=createSyntaxTreeNode(idType, $1,$3,NULL,NULL);}
+var : ID {$$=createSyntaxTreeNode(idType, $1, 0,0,0);}
+    | ID LS expression RS {$$=createSyntaxTreeNode(idType, $1,$3,0,0);}
     ;
 simple_expression : additive_expression {$$=$1;}
-                  | additive_expression relop additive_expression {$$=createSyntaxTreeNode(expressionType, NULL,  $2, $1, $3);}
+                  | additive_expression relop additive_expression {$$=createSyntaxTreeNode(expressionType, 0,  $2, $1, $3);}
                   ;
-relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | LESS { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | GREA_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | GREA { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | EQUAL { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
+relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | LESS { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | GREA_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | GREA { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
-additive_expression : additive_expression addop term{$$=createSyntaxTreeNode(expressionType, NULL, $2, $1, $3);}
+additive_expression : additive_expression addop term{$$=createSyntaxTreeNode(expressionType, 0, $2, $1, $3);}
                     | term {$$=$1;}
                     ;
-addop : ADD {$$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | SUB {$$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
+addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
-term : term mulop factor {$$=createSyntaxTreeNode(expressionType, NULL, $2, $1, $3);}
+term : term mulop factor {$$=createSyntaxTreeNode(expressionType, 0, $2, $1, $3);}
      | factor {$$=$1;}
      ;
-mulop : MUL {$$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
-      | DIV {$$=createSyntaxTreeNode(opType, $1, NULL,NULL,NULL);}
+mulop : MUL {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+      | DIV {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
 factor : LP expression RP {$$=$2;}
        | var {$$=$1;}
        | call {$$=$1;}
-       | NUM {$$=createSyntaxTreeNode(constType, $1, NULL,NULL,NULL);}
+       | NUM {$$=createSyntaxTreeNode(constType, $1, 0,0,0);}
        ;
-call : ID LP args RP {$$=createSyntaxTreeNode(funCall, $1, $3,NULL,NULL);}
+call : ID LP args RP {$$=createSyntaxTreeNode(funCall, $1, $3,0,0);}
      ;
 args : arg_list {$$=$1;}
-     |  {$$=NULL;}
+     |  {$$=0;}
      ;
-arg_list : arg_list COM expression {$$=createSyntaxTreeNode(argList, NULL, $1, $3,NULL);}
+arg_list : arg_list COM expression {$$=createSyntaxTreeNode(argList, 0, $1, $3,0);}
          | expression {$$=$1;}
          ;
 
@@ -205,7 +207,7 @@ int main(int argc, char* argv[]) {
            perror(argv[1]);
            return 1;
         }
-        FILE * fout = NULL;
+        FILE * fout = 0;
         if(argc > 2)
             fout = fopen(argv[2], "w");
         if(fout)

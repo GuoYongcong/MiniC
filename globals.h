@@ -31,7 +31,7 @@ typedef enum
     ifStmt, whlieStmt, assignStmt, returnStmt, compoundStmt,
     varDeclaration, funDeclaration, funCall,  expressionType,
 	declarationList, paramList, localDeclaration, statementList,
-	argList, opType, constType, idType, typeType
+	argList, opType, constType, idType, typeType, program
 }NodeType;
 
 //语法树结点定义
