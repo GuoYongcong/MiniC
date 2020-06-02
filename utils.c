@@ -9,7 +9,7 @@
 *   <author>  <version> <date>    <description>
 */
 
-#include <stdarg.h>
+#include <stdio.h>
 #include "globals.h"
 #include "utils.h"
 /**
@@ -54,9 +54,18 @@ static int indentno = 0;
  */
 static void printSpaces(void)
 {
-  for (int i=0;i<indentno;i++)
-    fprintf(yyout," ");
+    for (int i=0;i<indentno;i++)
+        fprintf(yyout," ");
 }
+
+/**
+ * 退格函数
+ * @method backspaces
+ */
+static void backspaces(void){
+    fseek(yyout, -1L*indentno, SEEK_CUR);
+}
+
 /**
  * 20个打印不同类型结点内容的函数
  * @param  tree     语法树的某个结点
@@ -83,7 +92,7 @@ void fun_constType(struct Node * tree){ fprintf(yyout,"const: %d\n", tree->attr.
 void fun_idType(struct Node * tree){ fprintf(yyout,"id: %s\n", tree->attr.ch); }
 void fun_typeType(struct Node * tree){ fprintf(yyout,"type: %s\n", tree->attr.ch); }
 void fun_program(struct Node * tree){ fprintf(yyout,"program: \n"); }
-void fun_noType(struct Node * tree){ fprintf(yyout,"\n"); }
+void fun_noType(struct Node * tree){ backspaces(); }
 
 
 //函数指针数组
