@@ -137,8 +137,8 @@ var : ID {$$=createSyntaxTreeNode(idType, $1, 0,0,0);}
     ;
 simple_expression : additive_expression {$$=$1;}
                   | additive_expression relop additive_expression {
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3, 0);
-    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
+    $$=addBrotherNode($2, n);
 }
                   ;
 relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
@@ -149,8 +149,8 @@ relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
 additive_expression : additive_expression addop term{
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3,0);
-    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
+    $$=addBrotherNode($2, n);
 }
                     | term {$$=$1;}
                     ;
@@ -158,8 +158,8 @@ addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
 term : term mulop factor {
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3, 0);
-    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
+    $$=addBrotherNode($2, n);
 }
      | factor {$$=$1;}
      ;
@@ -188,7 +188,7 @@ arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
  * @return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"syntax error:%s at line %d\n",str,yylineno);
+    fprintf(stderr,"%s at line %d\n",str,yylineno);
 }
 
 /**

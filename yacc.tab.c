@@ -973,8 +973,8 @@ case 39:
 case 40:
 #line 139 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
-    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
+    yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 41:
@@ -1004,8 +1004,8 @@ case 46:
 case 47:
 #line 151 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node,0);
-    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
+    yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 48:
@@ -1023,8 +1023,8 @@ case 50:
 case 51:
 #line 160 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
-    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
+    yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 52:
@@ -1306,7 +1306,7 @@ yyerrhandle:
  * @return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"syntax error:%s at line %d\n",str,yylineno);
+    fprintf(stderr,"%s at line %d\n",str,yylineno);
 }
 
 /**

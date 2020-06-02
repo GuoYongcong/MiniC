@@ -110,7 +110,7 @@ void fun_constType(struct Node * tree){ fprintf(yyout,"const: %d\n", tree->attr.
 void fun_idType(struct Node * tree){ fprintf(yyout,"id: %s\n", tree->attr.ch); }
 void fun_typeType(struct Node * tree){ fprintf(yyout,"type: %s\n", tree->attr.ch); }
 void fun_program(struct Node * tree){ fprintf(yyout,"program\n"); }
-void fun_noType(struct Node * tree){ backspaces(); }
+void fun_defaultType(struct Node * tree){ backspaces(); }
 
 
 //函数指针数组
@@ -120,7 +120,7 @@ void (*funs[])(struct Node *) =
     fun_varDeclaration, fun_funDeclaration, fun_funCall, fun_expressionType,
 	fun_declarationList, fun_paramList, fun_localDeclaration, fun_statementList,
 	fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType, fun_program,
-    fun_noType
+    fun_defaultType
 };
 
 /**
