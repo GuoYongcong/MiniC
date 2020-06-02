@@ -20,6 +20,9 @@
 void yyerror(const char *str);
 //行号
 extern int yylineno;
+//列号
+extern int columnno;
+
 //语法树根结点
 struct Node * treeRoot = 0; 
 %}
@@ -188,7 +191,7 @@ arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
  * @return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"%s at line %d\n",str,yylineno);
+    fprintf(stderr,"%s at line %d, column %d\n",str,yylineno, columnno);
 }
 
 /**
