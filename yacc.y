@@ -66,7 +66,7 @@ struct Node * treeRoot = 0;
  */
 program : declaration_list {treeRoot=createSyntaxTreeNode(program, 0,$1,0,0);}
         ;
-declaration_list : declaration_list declaration {$$=createSyntaxTreeNode(declarationList, 0, $1, $2,0);}
+declaration_list : declaration_list declaration {$$=addBrotherNode($1, $2);}
                  | expression {$$=$1;}
                  | declaration {$$=$1;}
                  ;
@@ -91,7 +91,7 @@ fun_declaration : tpye_specifier ID LP params RP compound_stmt {$$=createSyntaxT
 params : param_list {$$=$1;}
        | VOID {$$=0;}
        ;
-param_list : param_list COM param {$$=createSyntaxTreeNode(paramList, 0, $1, $3,0);}
+param_list : param_list COM param {$$=addBrotherNode($1, $3);}
            | param {$$=$1;}
            ;
 param : tpye_specifier ID {
@@ -105,10 +105,10 @@ param : tpye_specifier ID {
       ;
 compound_stmt : LC local_declaration statement_list RC {$$=createSyntaxTreeNode(compoundStmt, 0,$2, $3,0); }
               ;
-local_declaration : local_declaration var_declaration {$$=createSyntaxTreeNode(localDeclaration, 0,$1, $2,0); }
+local_declaration : local_declaration var_declaration {$$=addBrotherNode($1, $2); }
                   | {$$=0;}
                   ;
-statement_list : statement_list statement {$$=createSyntaxTreeNode(statementList, 0,$1, $2,0); }
+statement_list : statement_list statement {$$=addBrotherNode($1, $2); }
                | {$$=0;}
                ;
 statement : expression_stmt {$$=$1;}
@@ -137,8 +137,8 @@ var : ID {$$=createSyntaxTreeNode(idType, $1, 0,0,0);}
     ;
 simple_expression : additive_expression {$$=$1;}
                   | additive_expression relop additive_expression {
-    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3, 0);
-    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3, 0);
+    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
 }
                   ;
 relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
@@ -149,8 +149,8 @@ relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
 additive_expression : additive_expression addop term{
-    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3,0);
-    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3,0);
+    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
 }
                     | term {$$=$1;}
                     ;
@@ -158,8 +158,8 @@ addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
 term : term mulop factor {
-    struct Node * n = createSyntaxTreeNode(noType, 0, $1, $3, 0);
-    $$=createSyntaxTreeNode(expressionType, 0, $2, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, $1, $3, 0);
+    $$=createSyntaxTreeNode(defaultType, 0, $2, n, 0);
 }
      | factor {$$=$1;}
      ;
@@ -176,7 +176,7 @@ call : ID LP args RP {$$=createSyntaxTreeNode(funCall, $1, $3,0,0);}
 args : arg_list {$$=$1;}
      |  {$$=0;}
      ;
-arg_list : arg_list COM expression {$$=createSyntaxTreeNode(argList, 0, $1, $3,0);}
+arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
          | expression {$$=$1;}
          ;
 
@@ -210,6 +210,7 @@ int yywrap(){
  * @return 返回值为0，正常退出；返回值为1，无法打开待分析的文件。
  */
 int main(int argc, char* argv[]) {
+
     if (argc > 1) {
         FILE *fin = fopen(argv[1], "r");
         if (!fin) {   

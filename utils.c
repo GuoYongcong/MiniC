@@ -33,12 +33,29 @@ struct Node * createSyntaxTreeNode(
 	{
 		t->nodeType = nodeType;
 		t->attr.ch = value;
-		int i;
 		t->childrenNode[0] = n1;
 		t->childrenNode[1] = n2;
 		t->childrenNode[2] = n3;
+		for(int i=0;i<MAXBRONUM;i++)
+		    t->brotherNode[i] = 0;
 	}
 	return t;
+}
+
+struct Node * addBrotherNode(struct Node * n1, struct Node * n2){
+    struct Node * t = (struct Node *)malloc(sizeof(struct Node));
+    if (NULL == t)
+        fprintf(yyout, "Out of memory error at line %d\n", yylineno);
+    else
+    {
+        t->nodeType = defaultType;
+        t->attr.ch = 0;
+        for(int i=0;i<MAXNUM;i++)
+            t->childrenNode[i] = 0;
+        t->brotherNode[0] = n1;
+        t->brotherNode[1] = n2;
+    }
+    return t;
 }
 
 //缩进的空格数
@@ -73,25 +90,25 @@ static void backspaces(void){
 void fun_ifStmt(struct Node * tree){ fprintf(yyout,"if\n"); }
 void fun_whlieStmt(struct Node * tree){ fprintf(yyout,"while\n"); }
 void fun_assignStmt(struct Node * tree){ fprintf(yyout,"assign\n");}
-void fun_returnStmt(struct Node * tree){ fprintf(yyout,"return: \n"); }
-void fun_compoundStmt(struct Node * tree) { fprintf(yyout, "compoundStmt: \n"); }
+void fun_returnStmt(struct Node * tree){ fprintf(yyout,"return\n"); }
+void fun_compoundStmt(struct Node * tree) { fprintf(yyout, "compoundStmt\n"); }
 
-void fun_varDeclaration(struct Node * tree){ fprintf(yyout,"varDeclaration: \n"); }
+void fun_varDeclaration(struct Node * tree){ fprintf(yyout,"varDeclaration\n"); }
 void fun_funDeclaration(struct Node * tree){ fprintf(yyout,"funDeclaration: %s\n",tree->attr.ch); }
 void fun_funCall(struct Node * tree){ fprintf(yyout,"call: %s\n", tree->attr.ch); }
-void fun_expressionType(struct Node * tree){ fprintf(yyout,"expression:\n"); }
+void fun_expressionType(struct Node * tree){ fprintf(yyout,"expression\n"); }
 
-void fun_declarationList(struct Node * tree) { fprintf(yyout, "declarationList: \n"); }
-void fun_paramList(struct Node * tree) { fprintf(yyout, "paramList: \n"); }
-void fun_localDeclaration(struct Node * tree) { fprintf(yyout, "localDeclaration: \n"); }
-void fun_statementList(struct Node * tree) { fprintf(yyout, "statementList:\n"); }
-void fun_argList(struct Node * tree) { fprintf(yyout, "argList:\n"); }
+void fun_declarationList(struct Node * tree) { fprintf(yyout, "declarationList\n"); }
+void fun_paramList(struct Node * tree) { fprintf(yyout, "paramList\n"); }
+void fun_localDeclaration(struct Node * tree) { fprintf(yyout, "localDeclaration\n"); }
+void fun_statementList(struct Node * tree) { fprintf(yyout, "statementList\n"); }
+void fun_argList(struct Node * tree) { fprintf(yyout, "argList\n"); }
 
 void fun_opType(struct Node * tree){ fprintf(yyout,"op: %s\n", tree->attr.ch); }
 void fun_constType(struct Node * tree){ fprintf(yyout,"const: %d\n", tree->attr.value); }
 void fun_idType(struct Node * tree){ fprintf(yyout,"id: %s\n", tree->attr.ch); }
 void fun_typeType(struct Node * tree){ fprintf(yyout,"type: %s\n", tree->attr.ch); }
-void fun_program(struct Node * tree){ fprintf(yyout,"program: \n"); }
+void fun_program(struct Node * tree){ fprintf(yyout,"program\n"); }
 void fun_noType(struct Node * tree){ backspaces(); }
 
 
@@ -112,16 +129,18 @@ void (*funs[])(struct Node *) =
  */
 void printTree( struct Node * tree )
 {
-    int i;
-    INDENT;
     if (tree != 0)
     {
+        INDENT;
         printSpaces();
-        if(tree->nodeType >= ifStmt && tree->nodeType <= noType)
+        if(tree->nodeType >= ifStmt && tree->nodeType <= defaultType)
             funs[tree->nodeType](tree); //根据nodeType直接调用相应的打印结点函数
         else fprintf(yyout,"Unknown node type\n");
-        for (i=0;i<MAXNUM;i++)
+        for (int i=0;i<MAXNUM;i++)
              printTree(tree->childrenNode[i]);
+        UNINDENT;
+        for (int i=0;i<MAXBRONUM;i++)
+            printTree(tree->brotherNode[i]);
+
     }
-    UNINDENT;
 }

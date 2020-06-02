@@ -807,7 +807,7 @@ case 1:
     break;}
 case 2:
 #line 69 "yacc.y"
-{yyval.node=createSyntaxTreeNode(declarationList, 0, yyvsp[-1].node, yyvsp[0].node,0);;
+{yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node);;
     break;}
 case 3:
 #line 70 "yacc.y"
@@ -862,7 +862,7 @@ case 13:
     break;}
 case 14:
 #line 94 "yacc.y"
-{yyval.node=createSyntaxTreeNode(paramList, 0, yyvsp[-2].node, yyvsp[0].node,0);;
+{yyval.node=addBrotherNode(yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 15:
 #line 95 "yacc.y"
@@ -888,7 +888,7 @@ case 18:
     break;}
 case 19:
 #line 108 "yacc.y"
-{yyval.node=createSyntaxTreeNode(localDeclaration, 0,yyvsp[-1].node, yyvsp[0].node,0); ;
+{yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node); ;
     break;}
 case 20:
 #line 109 "yacc.y"
@@ -896,7 +896,7 @@ case 20:
     break;}
 case 21:
 #line 111 "yacc.y"
-{yyval.node=createSyntaxTreeNode(statementList, 0,yyvsp[-1].node, yyvsp[0].node,0); ;
+{yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node); ;
     break;}
 case 22:
 #line 112 "yacc.y"
@@ -973,8 +973,8 @@ case 39:
 case 40:
 #line 139 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(noType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
-    yyval.node=createSyntaxTreeNode(expressionType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
+    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
 ;
     break;}
 case 41:
@@ -1004,8 +1004,8 @@ case 46:
 case 47:
 #line 151 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(noType, 0, yyvsp[-2].node, yyvsp[0].node,0);
-    yyval.node=createSyntaxTreeNode(expressionType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node,0);
+    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
 ;
     break;}
 case 48:
@@ -1023,8 +1023,8 @@ case 50:
 case 51:
 #line 160 "yacc.y"
 {
-    struct Node * n = createSyntaxTreeNode(noType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
-    yyval.node=createSyntaxTreeNode(expressionType, 0, yyvsp[-1].node, n, 0);
+    struct Node * n = createSyntaxTreeNode(defaultType, 0, yyvsp[-2].node, yyvsp[0].node, 0);
+    yyval.node=createSyntaxTreeNode(defaultType, 0, yyvsp[-1].node, n, 0);
 ;
     break;}
 case 52:
@@ -1069,7 +1069,7 @@ case 61:
     break;}
 case 62:
 #line 179 "yacc.y"
-{yyval.node=createSyntaxTreeNode(argList, 0, yyvsp[-2].node, yyvsp[0].node,0);;
+{yyval.node=addBrotherNode(yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 63:
 #line 180 "yacc.y"
@@ -1328,6 +1328,7 @@ int yywrap(){
  * @return 返回值为0，正常退出；返回值为1，无法打开待分析的文件。
  */
 int main(int argc, char* argv[]) {
+
     if (argc > 1) {
         FILE *fin = fopen(argv[1], "r");
         if (!fin) {   
