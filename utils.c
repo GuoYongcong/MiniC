@@ -6,7 +6,8 @@
 * @Version: 1.0
 * @Date:   2020-05-01
 * @History:
-*   <author>  <version> <date>    <description>
+*   <author>  <version>   <date>       <description>
+*   郭永聪     1.0.1       2020-06-02   添加了两个函数addBrotherNode和backspaces
 */
 
 #include <stdio.h>
