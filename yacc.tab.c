@@ -46,11 +46,12 @@ void yyerror(const char *str);
 extern int yylineno;
 //列号
 extern int columnno;
-
+//token
+extern char *yytext;
 //语法树根结点
 struct Node * treeRoot = 0; 
 
-#line 29 "yacc.y"
+#line 30 "yacc.y"
 typedef union{ 
     int value;
     char* ch;
@@ -145,13 +146,13 @@ static const short yyrhs[] = {    32,
 
 #if YYDEBUG != 0
 static const short yyrline[] = { 0,
-    70,    72,    73,    74,    76,    77,    79,    83,    89,    90,
-    92,    94,    95,    97,    98,   100,   104,   109,   111,   112,
-   114,   115,   117,   118,   119,   120,   121,   123,   124,   126,
-   127,   129,   131,   132,   135,   136,   138,   139,   141,   142,
-   147,   148,   149,   150,   151,   152,   154,   158,   160,   161,
-   163,   167,   169,   170,   172,   173,   174,   175,   177,   179,
-   180,   182,   183
+    71,    73,    74,    75,    77,    78,    80,    84,    90,    91,
+    93,    95,    96,    98,    99,   101,   105,   110,   112,   113,
+   115,   116,   118,   119,   120,   121,   122,   124,   125,   127,
+   128,   130,   132,   133,   136,   137,   139,   140,   142,   143,
+   148,   149,   150,   151,   152,   153,   155,   159,   161,   162,
+   164,   168,   170,   171,   173,   174,   175,   176,   178,   180,
+   181,   183,   184
 };
 #endif
 
@@ -805,277 +806,277 @@ yyreduce:
   switch (yyn) {
 
 case 1:
-#line 70 "yacc.y"
+#line 71 "yacc.y"
 {treeRoot=createSyntaxTreeNode(program, 0,yyvsp[0].node,0,0);;
     break;}
 case 2:
-#line 72 "yacc.y"
+#line 73 "yacc.y"
 {yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node);;
     break;}
 case 3:
-#line 73 "yacc.y"
-{yyval.node=yyvsp[0].node;;
-    break;}
-case 4:
 #line 74 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 5:
-#line 76 "yacc.y"
+case 4:
+#line 75 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 6:
+case 5:
 #line 77 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
+case 6:
+#line 78 "yacc.y"
+{yyval.node=yyvsp[0].node;;
+    break;}
 case 7:
-#line 79 "yacc.y"
+#line 80 "yacc.y"
 {
                     struct Node * n1=createSyntaxTreeNode(idType, yyvsp[-1].ch, 0,0,0);
                     yyval.node=createSyntaxTreeNode(varDeclaration, 0, yyvsp[-2].node, n1,0);
 ;
     break;}
 case 8:
-#line 83 "yacc.y"
+#line 84 "yacc.y"
 {
-                    struct Node * n1=createSyntaxTreeNode(idType, yyvsp[-4].ch, 0,0,0);
-                    struct Node * n2=createSyntaxTreeNode(constType, yyvsp[-2].value, 0,0,0);
-                    yyval.node=createSyntaxTreeNode(varDeclaration, 0, yyvsp[-5].node, n1, n2);
+                    struct Node * n1=createSyntaxTreeNode(constType, yyvsp[-2].value, 0,0,0);
+                    struct Node * n2=createSyntaxTreeNode(idType, yyvsp[-4].ch, n1,0,0);
+                    yyval.node=createSyntaxTreeNode(varDeclaration, 0, yyvsp[-5].node, n2, 0);
 ;
     break;}
 case 9:
-#line 89 "yacc.y"
+#line 90 "yacc.y"
 {yyval.node=createSyntaxTreeNode(typeType, yyvsp[0].ch, 0,0,0); ;
     break;}
 case 10:
-#line 90 "yacc.y"
+#line 91 "yacc.y"
 {yyval.node=createSyntaxTreeNode(typeType, yyvsp[0].ch, 0,0,0);;
     break;}
 case 11:
-#line 92 "yacc.y"
+#line 93 "yacc.y"
 {yyval.node=createSyntaxTreeNode(funDeclaration, yyvsp[-4].ch, yyvsp[-5].node, yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 12:
-#line 94 "yacc.y"
+#line 95 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 13:
-#line 95 "yacc.y"
+#line 96 "yacc.y"
 {yyval.node=0;;
     break;}
 case 14:
-#line 97 "yacc.y"
+#line 98 "yacc.y"
 {yyval.node=addBrotherNode(yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 15:
-#line 98 "yacc.y"
+#line 99 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 16:
-#line 100 "yacc.y"
+#line 101 "yacc.y"
 {
     struct Node * n1=createSyntaxTreeNode(idType, yyvsp[0].ch, 0,0,0);
     yyval.node=createSyntaxTreeNode(varDeclaration, 0, yyvsp[-1].node, n1,0);
 ;
     break;}
 case 17:
-#line 104 "yacc.y"
+#line 105 "yacc.y"
 {
     struct Node * n1=createSyntaxTreeNode(idType, yyvsp[-2].ch, 0,0,0);
     yyval.node=createSyntaxTreeNode(varDeclaration, 0,yyvsp[-3].node, n1,0);
 ;
     break;}
 case 18:
-#line 109 "yacc.y"
+#line 110 "yacc.y"
 {yyval.node=createSyntaxTreeNode(compoundStmt, 0,yyvsp[-2].node, yyvsp[-1].node,0); ;
     break;}
 case 19:
-#line 111 "yacc.y"
+#line 112 "yacc.y"
 {yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node); ;
     break;}
 case 20:
-#line 112 "yacc.y"
+#line 113 "yacc.y"
 {yyval.node=0;;
     break;}
 case 21:
-#line 114 "yacc.y"
+#line 115 "yacc.y"
 {yyval.node=addBrotherNode(yyvsp[-1].node, yyvsp[0].node); ;
     break;}
 case 22:
-#line 115 "yacc.y"
+#line 116 "yacc.y"
 {yyval.node=0;;
     break;}
 case 23:
-#line 117 "yacc.y"
-{yyval.node=yyvsp[0].node;;
-    break;}
-case 24:
 #line 118 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 25:
+case 24:
 #line 119 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 26:
+case 25:
 #line 120 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 27:
+case 26:
 #line 121 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
+case 27:
+#line 122 "yacc.y"
+{yyval.node=yyvsp[0].node;;
+    break;}
 case 28:
-#line 123 "yacc.y"
+#line 124 "yacc.y"
 {yyval.node=yyvsp[-1].node;;
     break;}
 case 29:
-#line 124 "yacc.y"
+#line 125 "yacc.y"
 {yyval.node=0;;
     break;}
 case 30:
-#line 126 "yacc.y"
+#line 127 "yacc.y"
 {yyval.node=createSyntaxTreeNode(ifStmt, 0,yyvsp[-4].node, yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 31:
-#line 127 "yacc.y"
+#line 128 "yacc.y"
 {yyval.node=createSyntaxTreeNode(ifStmt, 0, yyvsp[-2].node, yyvsp[0].node,0);;
     break;}
 case 32:
-#line 129 "yacc.y"
+#line 130 "yacc.y"
 {yyval.node=createSyntaxTreeNode(whlieStmt, 0, yyvsp[-2].node, yyvsp[0].node,0);;
     break;}
 case 33:
-#line 131 "yacc.y"
+#line 132 "yacc.y"
 {yyval.node=createSyntaxTreeNode(returnStmt, 0 ,yyvsp[-1].node,0,0);;
     break;}
 case 34:
-#line 132 "yacc.y"
+#line 133 "yacc.y"
 {yyval.node=createSyntaxTreeNode(returnStmt, 0, 0,0,0);;
     break;}
 case 35:
-#line 135 "yacc.y"
+#line 136 "yacc.y"
 {yyval.node=createSyntaxTreeNode(assignStmt, 0, yyvsp[-2].node, yyvsp[0].node,0);;
     break;}
 case 36:
-#line 136 "yacc.y"
+#line 137 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 37:
-#line 138 "yacc.y"
+#line 139 "yacc.y"
 {yyval.node=createSyntaxTreeNode(idType, yyvsp[0].ch, 0,0,0);;
     break;}
 case 38:
-#line 139 "yacc.y"
+#line 140 "yacc.y"
 {yyval.node=createSyntaxTreeNode(idType, yyvsp[-3].ch,yyvsp[-1].node,0,0);;
     break;}
 case 39:
-#line 141 "yacc.y"
+#line 142 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 40:
-#line 142 "yacc.y"
+#line 143 "yacc.y"
 {
     struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
     yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 41:
-#line 147 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
-    break;}
-case 42:
 #line 148 "yacc.y"
 { yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
-case 43:
+case 42:
 #line 149 "yacc.y"
 { yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
-case 44:
+case 43:
 #line 150 "yacc.y"
 { yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
-case 45:
+case 44:
 #line 151 "yacc.y"
 { yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
-case 46:
+case 45:
 #line 152 "yacc.y"
 { yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
+case 46:
+#line 153 "yacc.y"
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+    break;}
 case 47:
-#line 154 "yacc.y"
+#line 155 "yacc.y"
 {
     struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
     yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 48:
-#line 158 "yacc.y"
+#line 159 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 49:
-#line 160 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
-    break;}
-case 50:
 #line 161 "yacc.y"
 {yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
+case 50:
+#line 162 "yacc.y"
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+    break;}
 case 51:
-#line 163 "yacc.y"
+#line 164 "yacc.y"
 {
     struct Node * n = createSyntaxTreeNode(defaultType,0, yyvsp[-2].node, yyvsp[0].node, 0);
     yyval.node=addBrotherNode(yyvsp[-1].node, n);
 ;
     break;}
 case 52:
-#line 167 "yacc.y"
+#line 168 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 53:
-#line 169 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
-    break;}
-case 54:
 #line 170 "yacc.y"
 {yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
     break;}
+case 54:
+#line 171 "yacc.y"
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+    break;}
 case 55:
-#line 172 "yacc.y"
+#line 173 "yacc.y"
 {yyval.node=yyvsp[-1].node;;
     break;}
 case 56:
-#line 173 "yacc.y"
-{yyval.node=yyvsp[0].node;;
-    break;}
-case 57:
 #line 174 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
-case 58:
+case 57:
 #line 175 "yacc.y"
+{yyval.node=yyvsp[0].node;;
+    break;}
+case 58:
+#line 176 "yacc.y"
 {yyval.node=createSyntaxTreeNode(constType, yyvsp[0].value, 0,0,0);;
     break;}
 case 59:
-#line 177 "yacc.y"
+#line 178 "yacc.y"
 {yyval.node=createSyntaxTreeNode(funCall, yyvsp[-3].ch, yyvsp[-1].node,0,0);;
     break;}
 case 60:
-#line 179 "yacc.y"
+#line 180 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 case 61:
-#line 180 "yacc.y"
+#line 181 "yacc.y"
 {yyval.node=0;;
     break;}
 case 62:
-#line 182 "yacc.y"
+#line 183 "yacc.y"
 {yyval.node=addBrotherNode(yyvsp[-2].node, yyvsp[0].node);;
     break;}
 case 63:
-#line 183 "yacc.y"
+#line 184 "yacc.y"
 {yyval.node=yyvsp[0].node;;
     break;}
 }
@@ -1300,7 +1301,7 @@ yyerrhandle:
     }
   return 1;
 }
-#line 186 "yacc.y"
+#line 187 "yacc.y"
 
 /**
  * 打印语法错误
@@ -1309,7 +1310,8 @@ yyerrhandle:
  * @return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"%s at line %d, column %d\n",str,yylineno, columnno);
+    fprintf(stderr,"%s, unexpected token -> %s at line %d, column %d.\n",
+    str, yytext,yylineno, columnno);
 }
 
 /**

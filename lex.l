@@ -101,5 +101,5 @@ NOTES            {LN}([^*]|[*]+[^*/])*[*]*{RN}
 \t                  {columnno+=4; }
 \n                  {columnno=0;}
 <<EOF>>            {yyterminate();}
-.                  {columnno+=yyleng; printf("lexical error,%s at line %d, column %d.\n",yytext,yylineno, columnno);}
+.                  {columnno+=yyleng; fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno);}
 %%

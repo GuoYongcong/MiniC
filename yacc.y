@@ -22,7 +22,8 @@ void yyerror(const char *str);
 extern int yylineno;
 //列号
 extern int columnno;
-
+//token
+extern char *yytext;
 //语法树根结点
 struct Node * treeRoot = 0; 
 %}
@@ -81,9 +82,9 @@ var_declaration : tpye_specifier ID SEM {
                     $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1,0);
 }
                 | tpye_specifier ID LS NUM RS SEM {
-                    struct Node * n1=createSyntaxTreeNode(idType, $2, 0,0,0);
-                    struct Node * n2=createSyntaxTreeNode(constType, $4, 0,0,0);
-                    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1, n2);
+                    struct Node * n1=createSyntaxTreeNode(constType, $4, 0,0,0);
+                    struct Node * n2=createSyntaxTreeNode(idType, $2, n1,0,0);
+                    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n2, 0);
 }
                 ;
 tpye_specifier : INT {$$=createSyntaxTreeNode(typeType, $1, 0,0,0); }
@@ -191,7 +192,8 @@ arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
  * @return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"%s at line %d, column %d\n",str,yylineno, columnno);
+    fprintf(stderr,"%s, unexpected token -> %s at line %d, column %d.\n",
+    str, yytext,yylineno, columnno);
 }
 
 /**

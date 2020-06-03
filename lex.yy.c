@@ -263,13 +263,9 @@ static void yy_flex_free YY_PROTO(( void * ));
 
 
 #define YY_USES_REJECT
-
-#define FLEX_DEBUG
 typedef unsigned char YY_CHAR;
 FILE *yyin = (FILE *) 0, *yyout = (FILE *) 0;
 typedef int yy_state_type;
-
-#define FLEX_DEBUG
 extern int yylineno;
 int yylineno = 1;
 extern char *yytext;
@@ -414,17 +410,6 @@ static yyconst short int yy_chk[109] =
        60,   60,   60,   60,   60,   60,   60,   60
     } ;
 
-extern int yy_flex_debug;
-int yy_flex_debug = 1;
-
-static yyconst short int yy_rule_linenum[33] =
-    {   0,
-       71,   72,   73,   74,   75,   76,   77,   78,   79,   80,
-       81,   82,   83,   84,   85,   86,   87,   88,   89,   90,
-       91,   92,   93,   94,   95,   96,   97,   98,  100,  101,
-      102,  104
-    } ;
-
 static yy_state_type yy_state_buf[YY_BUF_SIZE + 2], *yy_state_ptr;
 static char *yy_full_match;
 static int yy_lp;
@@ -443,7 +428,7 @@ char *yytext;
 #define INITIAL 0
 /*
 * @Copyright (c), 2020-2020, GuoYongcong.
-* @File name: lex.l
+* @File name: lex.yy.c
 * @Description: 该文件定义了 Mini C 的保留字、专用符号和其他标记，
 *               该文件经过Flex编译之后生成lex.yy.c文件。
 * @Author: 郭永聪
@@ -470,7 +455,7 @@ int columnno = 1;
 /**
  * 注释
  */
-#line 474 "lex.yy.c"
+#line 459 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -623,7 +608,7 @@ YY_DECL
 
 #line 70 "lex.l"
 
-#line 627 "lex.yy.c"
+#line 612 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -711,21 +696,6 @@ find_rule: /* we branch to this label when backing up */
 
 do_action:	/* This label is used only to access EOF actions. */
 
-		if ( yy_flex_debug )
-			{
-			if ( yy_act == 0 )
-				fprintf( stderr, "--scanner backing up\n" );
-			else if ( yy_act < 33 )
-				fprintf( stderr, "--accepting rule at line %d (\"%s\")\n",
-				         yy_rule_linenum[yy_act], yytext );
-			else if ( yy_act == 33 )
-				fprintf( stderr, "--accepting default rule (\"%s\")\n",
-				         yytext );
-			else if ( yy_act == 34 )
-				fprintf( stderr, "--(end of buffer or a NUL)\n" );
-			else
-				fprintf( stderr, "--EOF (start condition %d)\n", YY_START );
-			}
 
 		switch ( yy_act )
 	{ /* beginning of action switch */
@@ -742,7 +712,7 @@ YY_RULE_SETUP
 case 3:
 YY_RULE_SETUP
 #line 73 "lex.l"
-{columnno+=yyleng; yylval.ch = yytext;return INT;}
+{columnno+=yyleng; yylval.ch = strdup(yytext);return INT;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
@@ -891,14 +861,14 @@ case YY_STATE_EOF(INITIAL):
 case 32:
 YY_RULE_SETUP
 #line 104 "lex.l"
-{columnno+=yyleng; printf("lexical error,%s at line %d, column %d.\n",yytext,yylineno, columnno);}
+{columnno+=yyleng; fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
 #line 105 "lex.l"
 ECHO;
 	YY_BREAK
-#line 902 "lex.yy.c"
+#line 872 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
