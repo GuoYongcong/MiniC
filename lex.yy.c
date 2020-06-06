@@ -428,7 +428,7 @@ char *yytext;
 #define INITIAL 0
 /*
 * @Copyright (c), 2020-2020, GuoYongcong.
-* @File name: lex.yy.c
+* @File name: lex.l
 * @Description: 该文件定义了 Mini C 的保留字、专用符号和其他标记，
 *               该文件经过Flex编译之后生成lex.yy.c文件。
 * @Author: 郭永聪
@@ -441,8 +441,15 @@ char *yytext;
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "globals.h"
 #include "yacc.tab.h"
 int columnno = 1;
+
+//YY_USER_ACTION在token操作之前执行
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;\
+    yylloc.first_column = columnno;\
+    yylloc.last_column = columnno + yyleng;\
+	columnno += yyleng;
 /**
  * 保留字
  */
@@ -455,7 +462,7 @@ int columnno = 1;
 /**
  * 注释
  */
-#line 459 "lex.yy.c"
+#line 466 "lex.yy.c"
 
 /* Macros after this point can all be overridden by user definitions in
  * section 1.
@@ -606,9 +613,9 @@ YY_DECL
 	register char *yy_cp, *yy_bp;
 	register int yy_act;
 
-#line 70 "lex.l"
+#line 77 "lex.l"
 
-#line 612 "lex.yy.c"
+#line 619 "lex.yy.c"
 
 	if ( yy_init )
 		{
@@ -701,174 +708,174 @@ do_action:	/* This label is used only to access EOF actions. */
 	{ /* beginning of action switch */
 case 1:
 YY_RULE_SETUP
-#line 71 "lex.l"
-{columnno+=yyleng; return ELSE;}
+#line 78 "lex.l"
+{ return ELSE;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 72 "lex.l"
-{columnno+=yyleng; return IF;}
+#line 79 "lex.l"
+{ return IF;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 73 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return INT;}
+#line 80 "lex.l"
+{ yylval.ch = strdup(yytext);return INT;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 74 "lex.l"
-{columnno+=yyleng; return RETURN;}
+#line 81 "lex.l"
+{ return RETURN;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 75 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return VOID;}
+#line 82 "lex.l"
+{ yylval.ch = strdup(yytext);return VOID;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 76 "lex.l"
-{columnno+=yyleng; return WHILE;}
+#line 83 "lex.l"
+{ return WHILE;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 77 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return ADD;}
+#line 84 "lex.l"
+{ yylval.ch = strdup(yytext);return ADD;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 78 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return SUB;}
+#line 85 "lex.l"
+{ yylval.ch = strdup(yytext);return SUB;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 79 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return MUL;}
+#line 86 "lex.l"
+{ yylval.ch = strdup(yytext);return MUL;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 80 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return DIV;}
+#line 87 "lex.l"
+{ yylval.ch = strdup(yytext);return DIV;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 81 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return LESS;}
+#line 88 "lex.l"
+{ yylval.ch = strdup(yytext);return LESS;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 82 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return LESS_OR_EQUAL;}
+#line 89 "lex.l"
+{ yylval.ch = strdup(yytext);return LESS_OR_EQUAL;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 83 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return GREA;}
+#line 90 "lex.l"
+{ yylval.ch = strdup(yytext);return GREA;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 84 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return GREA_OR_EQUAL;}
+#line 91 "lex.l"
+{ yylval.ch = strdup(yytext);return GREA_OR_EQUAL;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 85 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return EQUAL;}
+#line 92 "lex.l"
+{ yylval.ch = strdup(yytext);return EQUAL;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 86 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return NOT_EQUAL;}
+#line 93 "lex.l"
+{ yylval.ch = strdup(yytext);return NOT_EQUAL;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 87 "lex.l"
-{columnno+=yyleng; return ASSI;}
+#line 94 "lex.l"
+{ return ASSI;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 88 "lex.l"
-{columnno+=yyleng; return SEM;}
+#line 95 "lex.l"
+{ return SEM;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 89 "lex.l"
-{columnno+=yyleng; return COM;}
+#line 96 "lex.l"
+{ return COM;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 90 "lex.l"
-{columnno+=yyleng; return LP;}
+#line 97 "lex.l"
+{ return LP;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 91 "lex.l"
-{columnno+=yyleng; return RP;}
+#line 98 "lex.l"
+{ return RP;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 92 "lex.l"
-{columnno+=yyleng; return LS;}
+#line 99 "lex.l"
+{ return LS;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 93 "lex.l"
-{columnno+=yyleng; return RS;}
+#line 100 "lex.l"
+{ return RS;}
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 94 "lex.l"
-{columnno+=yyleng; return LC;}
+#line 101 "lex.l"
+{ return LC;}
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 95 "lex.l"
-{columnno+=yyleng; return RC;}
+#line 102 "lex.l"
+{ return RC;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 96 "lex.l"
-{columnno+=yyleng; yylval.ch = strdup(yytext);return ID;}
+#line 103 "lex.l"
+{ yylval.ch = strdup(yytext);return ID;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 97 "lex.l"
-{columnno+=yyleng; yylval.value = atoi(yytext);return NUM;}
+#line 104 "lex.l"
+{ yylval.value = atoi(yytext);return NUM;}
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 98 "lex.l"
-{}
+#line 105 "lex.l"
+{ }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 100 "lex.l"
-{columnno+=yyleng; }
+#line 107 "lex.l"
+{ }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 101 "lex.l"
-{columnno+=4; }
+#line 108 "lex.l"
+{columnno+=3; /*yyleng等于1，需要再加3*/ }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 102 "lex.l"
-{columnno=0;}
+#line 109 "lex.l"
+{columnno=1;}
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
-#line 103 "lex.l"
+#line 110 "lex.l"
 {yyterminate();}
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 104 "lex.l"
-{columnno+=yyleng; fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno);}
+#line 111 "lex.l"
+{ fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 105 "lex.l"
+#line 112 "lex.l"
 ECHO;
 	YY_BREAK
-#line 872 "lex.yy.c"
+#line 879 "lex.yy.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -1750,5 +1757,4 @@ int main()
 	return 0;
 	}
 #endif
-#line 105 "lex.l"
-
+#line 112 "lex.l"

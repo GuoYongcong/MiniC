@@ -1,8 +1,25 @@
-typedef union{ 
+typedef union{
     int value;
     char* ch;
     struct Node* node;
 } YYSTYPE;
+
+#ifndef YYLTYPE
+typedef
+  struct yyltype
+    {
+      int timestamp;
+      int first_line;
+      int first_column;
+      int last_line;
+      int last_column;
+      char *text;
+   }
+  yyltype;
+
+#define YYLTYPE yyltype
+#endif
+
 #define	ELSE	257
 #define	IF	258
 #define	RETURN	259

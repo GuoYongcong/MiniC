@@ -15,10 +15,17 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "globals.h"
 #include "yacc.tab.h"
 int columnno = 1;
+
+//YY_USER_ACTION在token操作之前执行
+#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno;\
+    yylloc.first_column = columnno;\
+    yylloc.last_column = columnno + yyleng;\
+	columnno += yyleng;
 %}
-%option yylineno 
+%option yylineno
 /**
  * 保留字
  */
@@ -65,41 +72,41 @@ NUM              {digit}+
 /**
  * 注释
  */
-NOTES            {LN}([^*]|[*]+[^*/])*[*]*{RN}  
+NOTES            {LN}([^*]|[*]+[^*/])*[*]*{RN}
 
 %%
-{ELSE}             {columnno+=yyleng; return ELSE;}
-{IF}               {columnno+=yyleng; return IF;}
-{INT}              {columnno+=yyleng; yylval.ch = strdup(yytext);return INT;}
-{RETURN}           {columnno+=yyleng; return RETURN;}
-{VOID}             {columnno+=yyleng; yylval.ch = strdup(yytext);return VOID;}
-{WHILE}            {columnno+=yyleng; return WHILE;}
-{ADD}              {columnno+=yyleng; yylval.ch = strdup(yytext);return ADD;}
-{SUB}              {columnno+=yyleng; yylval.ch = strdup(yytext);return SUB;}
-{MUL}              {columnno+=yyleng; yylval.ch = strdup(yytext);return MUL;}
-{DIV}              {columnno+=yyleng; yylval.ch = strdup(yytext);return DIV;}
-{LESS}             {columnno+=yyleng; yylval.ch = strdup(yytext);return LESS;}
-{LESS_OR_EQUAL}    {columnno+=yyleng; yylval.ch = strdup(yytext);return LESS_OR_EQUAL;}
-{GREA}             {columnno+=yyleng; yylval.ch = strdup(yytext);return GREA;}
-{GREA_OR_EQUAL}    {columnno+=yyleng; yylval.ch = strdup(yytext);return GREA_OR_EQUAL;}
-{EQUAL}            {columnno+=yyleng; yylval.ch = strdup(yytext);return EQUAL;}
-{NOT_EQUAL}        {columnno+=yyleng; yylval.ch = strdup(yytext);return NOT_EQUAL;}
-{ASSI}             {columnno+=yyleng; return ASSI;}
-{SEM}              {columnno+=yyleng; return SEM;}
-{COM}              {columnno+=yyleng; return COM;}
-{LP}               {columnno+=yyleng; return LP;}
-{RP}               {columnno+=yyleng; return RP;}
-{LS}               {columnno+=yyleng; return LS;}
-{RS}               {columnno+=yyleng; return RS;}
-{LC}               {columnno+=yyleng; return LC;}
-{RC}               {columnno+=yyleng; return RC;}
-{ID}               {columnno+=yyleng; yylval.ch = strdup(yytext);return ID;}
-{NUM}              {columnno+=yyleng; yylval.value = atoi(yytext);return NUM;}
-{NOTES}            {}
+{ELSE}             { return ELSE;}
+{IF}               { return IF;}
+{INT}              { yylval.ch = strdup(yytext);return INT;}
+{RETURN}           { return RETURN;}
+{VOID}             { yylval.ch = strdup(yytext);return VOID;}
+{WHILE}            { return WHILE;}
+{ADD}              { yylval.ch = strdup(yytext);return ADD;}
+{SUB}              { yylval.ch = strdup(yytext);return SUB;}
+{MUL}              { yylval.ch = strdup(yytext);return MUL;}
+{DIV}              { yylval.ch = strdup(yytext);return DIV;}
+{LESS}             { yylval.ch = strdup(yytext);return LESS;}
+{LESS_OR_EQUAL}    { yylval.ch = strdup(yytext);return LESS_OR_EQUAL;}
+{GREA}             { yylval.ch = strdup(yytext);return GREA;}
+{GREA_OR_EQUAL}    { yylval.ch = strdup(yytext);return GREA_OR_EQUAL;}
+{EQUAL}            { yylval.ch = strdup(yytext);return EQUAL;}
+{NOT_EQUAL}        { yylval.ch = strdup(yytext);return NOT_EQUAL;}
+{ASSI}             { return ASSI;}
+{SEM}              { return SEM;}
+{COM}              { return COM;}
+{LP}               { return LP;}
+{RP}               { return RP;}
+{LS}               { return LS;}
+{RS}               { return RS;}
+{LC}               { return LC;}
+{RC}               { return RC;}
+{ID}               { yylval.ch = strdup(yytext);return ID;}
+{NUM}              { yylval.value = atoi(yytext);return NUM;}
+{NOTES}            { }
 
-[ ]+                {columnno+=yyleng; }
-\t                  {columnno+=4; }
-\n                  {columnno=0;}
+[ ]+                { }
+\t                 {columnno+=3; /*yyleng等于1，需要再加3*/ }
+\n                  {columnno=1;}
 <<EOF>>            {yyterminate();}
-.                  {columnno+=yyleng; fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno);}
+.                  { fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
 %%

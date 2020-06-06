@@ -14,17 +14,17 @@
  * loc = memory location is inserted only the
  * first time, otherwise ignored
  */
-void st_insert( char * name, int lineno, int loc );
+void st_insert(char *, char *, int, int);
 
-/* Function st_lookup returns the memory 
- * location of a variable or -1 if not found
+/* Function st_lookup returns the memory
+ * location of a variable or 0 if not found
  */
-int st_lookup ( char * name );
+BucketList st_lookup(char *, Loc *);
 
-/* Procedure printSymTab prints a formatted 
- * listing of the symbol table contents 
+/* Procedure printSymTab prints a formatted
+ * listing of the symbol table contents
  * to the listing file
  */
-void printSymTab(FILE * listing);
+void printSymTab(FILE *);
 
 #endif
