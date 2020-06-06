@@ -51,6 +51,7 @@ typedef enum
     constType,
     idType,
     typeType,
+    varType,
     program,
     defaultType
 } NodeType;
@@ -133,5 +134,4 @@ extern FILE *yyin, *yyout;
 extern bool TraceAnalyze;
 extern bool Error;
 extern YYLTYPE yylloc;
-extern Loc currentScope;
 #endif

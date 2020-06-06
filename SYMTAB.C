@@ -13,6 +13,7 @@
 #include <string.h>
 #include "symtab.h"
 #include "globals.h"
+#include "utils.h"
 
 /* SIZE is the size of the hash table */
 #define SIZE 211
@@ -23,8 +24,6 @@
 
 /* the hash table */
 static BucketList hashTable[SIZE];
-//当前作用域
-Loc currentScope = {0, 0, 0, 0};
 
 /* the hash function */
 static int hash(char *key)
@@ -81,12 +80,43 @@ BucketList st_lookup(char *name, Loc *loc)
 {
     int h = hash(name);
     BucketList l = hashTable[h];
-    while ((l != NULL) && (strcmp(name, l->name) != 0))
-        l = l->next;
-    if (l == NULL)
-        return NULL;
-    else
-        return l->memloc;
+    BucketList p = NULL;
+    // while ((l != NULL) && (strcmp(name, l->name) != 0))
+    //     l = l->next;
+    // if (l == NULL)
+    //     return NULL;
+    // else
+    // {
+    //     int result = compareScope(&l->scope, loc);
+    //     if (1 == result)
+    //     {
+    //     }
+    //     else if (-2 == result)
+    //     {
+    //         l = l->next;
+    //     }
+    // }
+    while (l != NULL)
+    {
+        while ((l != NULL) && (strcmp(name, l->name) != 0))
+            l = l->next;
+        if (l == NULL)
+            return p;
+        else
+        {
+            int result = compareScope(&l->scope, loc);
+            if (1 == result)
+            {
+                p = l;
+                l = l->inner;
+            }
+            else if (-2 == result)
+            {
+                l = l->next;
+            }
+        }
+    }
+    return p;
 }
 
 /* Procedure printSymTab prints a formatted

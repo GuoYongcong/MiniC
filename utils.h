@@ -26,7 +26,12 @@ void printTree(STNode);
 
 void printLocation(STNode);
 
-//比较作用域
-int compareScope(Loc *, Loc *);
+// 比较作用域
+// loc1包含loc2，返回1;
+// loc1与loc2相同，返回0;
+// loc1包含于loc2，返回-1;
+// loc1与loc2不相交，返回-2;
+// 其它情况，返回-3;
+int compareScope(Loc *loc1, Loc *loc2);
 
 #endif

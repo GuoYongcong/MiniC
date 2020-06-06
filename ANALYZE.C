@@ -8,6 +8,8 @@
 
 #include "globals.h"
 #include "symtab.h"
+#include "stack.h"
+#include "utils.h"
 #include "analyze.h"
 
 /* counter for variable memory locations */
@@ -77,8 +79,74 @@ static void insertNode(STNode t)
 {
     switch (t->nodeType)
     {
+    case program:
     case compoundStmt:
-        //newInnerSymTab(p);
+        push(&t->location);
+        break;
+    case funDeclaration:
+        if (NULL == st_lookup(t->attr.ch, &t->location))
+            //不在符号表中
+            st_insert(t->attr.ch,
+                      "function",
+                      t->location.first_line,
+                      location++);
+        else
+            // 已存在符号表中，重复声明函数
+            funRedeclarationError(t);
+        break;
+    case funCall:
+        if (NULL == st_lookup(t->attr.ch, &t->location))
+            //不在符号表中，变量使用前未声明
+            notDeclarationError(t);
+        else
+            // 已存在符号表中
+            st_insert(t->attr.ch,
+                      "function",
+                      t->location.first_line,
+                      0);
+
+        break;
+    case varDeclaration:
+        STNode stn = t->childrenNode[1];
+        BucketList l = st_lookup(stn->attr.ch, &stn->location);
+        if (NULL == l)
+            //不在符号表中
+            st_insert(stn->attr.ch,
+                      t->childrenNode[0]->attr.ch,
+                      stn->location.first_line,
+                      location++);
+        else
+        { // 已存在符号表中
+            while (-2 == compareScope(getTop(), &stn->location))
+                pop();
+
+            if (1 == compareScope(getTop(), &stn->location))
+            {
+                int result = compareScope(getTop(), &l->scope);
+                if (0 == result)
+                    //重复声明变量
+                    varRedeclarationError(t);
+                else if (-1 == result)
+                    //声明局部变量
+                    st_insert(stn->attr.ch,
+                              t->childrenNode[0]->attr.ch,
+                              stn->location.first_line,
+                              location++);
+            }
+        }
+        break;
+    case varType:
+        /*main.cpp:8:4: error: 'b' was not declared in this scope
+    8 |    b = 1;*/
+        if (NULL == st_lookup(t->attr.ch, &t->location))
+            //不在符号表中，变量使用前未声明
+            notDeclarationError(t);
+        else
+            // 已存在符号表中
+            st_insert(t->attr.ch,
+                      NULL,
+                      t->location.first_line,
+                      0);
 
         break;
     default:
@@ -144,7 +212,7 @@ static void typeError(STNode t, char *message)
     Error = true;
 }
 
-static void redeclarationError(STNode t)
+static void varRedeclarationError(STNode t)
 {
     fprintf(stderr, "error: redeclaration of \'%s %s\' at line %d, column %d.\n",
             t->childrenNode[0]->attr.ch,
@@ -154,11 +222,28 @@ static void redeclarationError(STNode t)
     Error = true;
 }
 
+static void funRedeclarationError(STNode t)
+{
+    fprintf(stderr, "error: redeclaration of \'%s %s\' at line %d, column %d.\n",
+            t->childrenNode[0]->attr.ch,
+            t->attr.ch,
+            t->location.first_line,
+            t->location.first_column);
+    Error = true;
+}
 static void conflictingDeclarationError(STNode t)
 {
     fprintf(stderr, "error: conflicting declaration \'%s %s\' at line %d, column %d.\n",
             t->childrenNode[0]->attr.ch,
             t->childrenNode[1]->attr.ch,
+            t->location.first_line,
+            t->location.first_column);
+    Error = true;
+}
+static void notDeclarationError(STNode t)
+{
+    fprintf(stderr, "error: \'%s\' was not declared in this scope,  at line %d, column %d.\n",
+            t->attr.ch,
             t->location.first_line,
             t->location.first_column);
     Error = true;

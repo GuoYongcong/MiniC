@@ -1001,14 +1001,14 @@ case 36:
 case 37:
 #line 156 "yacc.y"
 {
-    yyval.node=createSyntaxTreeNode(idType, yyvsp[0].ch, 0,0,0);
+    yyval.node=createSyntaxTreeNode(varType, yyvsp[0].ch, 0,0,0);
     setLocation(&yyval.node->location, &yylsp[0]);
 ;
     break;}
 case 38:
 #line 160 "yacc.y"
 {
-        yyval.node=createSyntaxTreeNode(idType, yyvsp[-3].ch,yyvsp[-1].node,0,0);
+        yyval.node=createSyntaxTreeNode(varType, yyvsp[-3].ch,yyvsp[-1].node,0,0);
         setLocation(&yyval.node->location, &yylsp[-3]);
     ;
     break;}

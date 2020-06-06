@@ -153,6 +153,8 @@ void fun_idType(STNode tree) { fprintf(yyout, "id: %s\n", tree->attr.ch); }
 
 void fun_typeType(STNode tree) { fprintf(yyout, "type: %s\n", tree->attr.ch); }
 
+void fun_varType(STNode tree) { fprintf(yyout, "id: %s\n", tree->attr.ch); }
+
 void fun_program(STNode tree) { fprintf(yyout, "program\n"); }
 
 void fun_defaultType(STNode tree) { backspaces(); }
@@ -163,8 +165,8 @@ void (*funs[])(STNode) =
         fun_ifStmt, fun_whlieStmt, fun_assignStmt, fun_returnStmt, fun_compoundStmt,
         fun_varDeclaration, fun_funDeclaration, fun_funCall, fun_expressionType,
         fun_declarationList, fun_paramList, fun_localDeclaration, fun_statementList,
-        fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType, fun_program,
-        fun_defaultType};
+        fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType, fun_varType,
+        fun_program, fun_defaultType};
 
 /**
  * 打印语法树

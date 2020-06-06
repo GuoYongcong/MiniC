@@ -154,11 +154,11 @@ expression : var ASSI expression {$$=createSyntaxTreeNode(assignStmt, 0, $1, $3,
            | simple_expression {$$=$1;}
            ;
 var : ID {
-    $$=createSyntaxTreeNode(idType, $1, 0,0,0);
+    $$=createSyntaxTreeNode(varType, $1, 0,0,0);
     setLocation(&$$->location, &@1);
 }
     | ID LS expression RS {
-        $$=createSyntaxTreeNode(idType, $1,$3,0,0);
+        $$=createSyntaxTreeNode(varType, $1,$3,0,0);
         setLocation(&$$->location, &@1);
     }
     ;
