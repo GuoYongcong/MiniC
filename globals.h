@@ -123,8 +123,8 @@ typedef struct BucketListRec
     LineList lines;
     int memloc; /* memory location for variable */
     struct BucketListRec *next;
-    struct BucketListRec *outer; //外部作用域
-    struct BucketListRec *inner; //内部作用域
+    // struct BucketListRec *outer; //外部作用域
+    // struct BucketListRec *inner; //内部作用域
 } * BucketList;
 
 //行号

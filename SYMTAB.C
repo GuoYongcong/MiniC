@@ -13,6 +13,7 @@
 #include <string.h>
 #include "symtab.h"
 #include "globals.h"
+#include "stack.h"
 #include "utils.h"
 
 /* SIZE is the size of the hash table */
@@ -37,41 +38,31 @@ static int hash(char *key)
     }
     return temp;
 }
-
-/* Procedure st_insert inserts line numbers and
- * memory locations into the symbol table
- * loc = memory location is inserted only the
- * first time, otherwise ignored
- */
-void st_insert(char *name, char *type, int lineno, int loc)
+void insertBucketList(char *name, char *type, int lineno, int loc)
 {
-    //和yyltype的行号和列号进行比较
     int h = hash(name);
-    BucketList l = hashTable[h];
-    while ((l != NULL) && (strcmp(name, l->name) != 0))
-        l = l->next;
-    if (l == NULL) /* variable not yet in table */
-    {
-        l = (BucketList)malloc(sizeof(struct BucketListRec));
-        l->name = name;
-        l->type = type;
-        l->lines = (LineList)malloc(sizeof(struct LineListRec));
-        l->lines->lineno = lineno;
-        l->memloc = loc;
-        l->lines->next = NULL;
-        l->next = hashTable[h];
-        hashTable[h] = l;
-    }
-    else /* found in table, so just add line number */
-    {
-        LineList t = l->lines;
-        while (t->next != NULL)
-            t = t->next;
-        t->next = (LineList)malloc(sizeof(struct LineListRec));
-        t->next->lineno = lineno;
-        t->next->next = NULL;
-    }
-} /* st_insert */
+    BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
+    l->name = name;
+    l->type = type;
+    l->attr.length = 0;
+    copyLocation(&l->scope, getTop());
+    l->lines = (LineList)malloc(sizeof(struct LineListRec));
+    l->lines->lineno = lineno;
+    l->lines->next = NULL;
+    l->memloc = loc;
+    l->next = hashTable[h];
+    hashTable[h] = l;
+}
+
+void insertLineList(BucketList l, int lineno)
+{
+    LineList t = l->lines;
+    while (t->next != NULL)
+        t = t->next;
+    t->next = (LineList)malloc(sizeof(struct LineListRec));
+    t->next->lineno = lineno;
+    t->next->next = NULL;
+}
 
 /* Function st_lookup returns the memory
  * location of a variable or 0 if not found
@@ -81,42 +72,33 @@ BucketList st_lookup(char *name, Loc *loc)
     int h = hash(name);
     BucketList l = hashTable[h];
     BucketList p = NULL;
-    // while ((l != NULL) && (strcmp(name, l->name) != 0))
-    //     l = l->next;
-    // if (l == NULL)
-    //     return NULL;
-    // else
+    // while (l != NULL)
     // {
-    //     int result = compareScope(&l->scope, loc);
-    //     if (1 == result)
-    //     {
-    //     }
-    //     else if (-2 == result)
-    //     {
+    //     while ((l != NULL) && (strcmp(name, l->name) != 0))
     //         l = l->next;
+    //     if (l == NULL)
+    //         return p;
+    //     else
+    //     {
+    //         int result = compareScope(&l->scope, loc);
+    //         if (1 == result)
+    //         {
+    //             p = l;
+    //             l = l->inner;
+    //         }
+    //         else if (-2 == result)
+    //         {
+    //             l = l->next;
+    //         }
     //     }
     // }
-    while (l != NULL)
-    {
-        while ((l != NULL) && (strcmp(name, l->name) != 0))
-            l = l->next;
-        if (l == NULL)
-            return p;
-        else
-        {
-            int result = compareScope(&l->scope, loc);
-            if (1 == result)
-            {
-                p = l;
-                l = l->inner;
-            }
-            else if (-2 == result)
-            {
-                l = l->next;
-            }
-        }
-    }
-    return p;
+
+    while ((l != NULL) && (strcmp(name, l->name) != 0) && compareScope(&l->scope, loc) != 1)
+        l = l->next;
+    if (l == NULL)
+        return NULL;
+    else
+        return l;
 }
 
 /* Procedure printSymTab prints a formatted

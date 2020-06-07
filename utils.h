@@ -20,7 +20,8 @@ STNode addBrotherNode(STNode, STNode);
 
 //添加位置信息
 void setLocation(Loc *, YYLTYPE *);
-
+//复制位置信息loc2 -> loc1
+void copyLocation(Loc *loc1, Loc *loc2);
 //打印语法树
 void printTree(STNode);
 

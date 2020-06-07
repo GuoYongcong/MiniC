@@ -87,6 +87,15 @@ void setLoc(Loc *loc, int fl, int fc, int ll, int lc)
     loc->last_column = lc;
 }
 
+void copyLocation(Loc *loc1, Loc *loc2)
+{
+    setLoc(loc1,
+           loc2->first_line,
+           loc2->first_column,
+           loc2->last_line,
+           loc2->last_column);
+}
+
 //缩进的空格数
 static int indentno = 0;
 

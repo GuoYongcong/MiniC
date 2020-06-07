@@ -85,69 +85,70 @@ static void insertNode(STNode t)
         break;
     case funDeclaration:
         if (NULL == st_lookup(t->attr.ch, &t->location))
-            //不在符号表中
-            st_insert(t->attr.ch,
-                      "function",
-                      t->location.first_line,
-                      location++);
+        { //不在符号表中
+            while (1 != compareScope(getTop(), &t->location))
+                pop();
+
+            insertBucketList(t->attr.ch,
+                             "function",
+                             t->location.first_line,
+                             location++);
+        }
         else
             // 已存在符号表中，重复声明函数
             funRedeclarationError(t);
         break;
     case funCall:
-        if (NULL == st_lookup(t->attr.ch, &t->location))
+        BucketList l = st_lookup(t->attr.ch, &t->location);
+        if (NULL == l)
             //不在符号表中，变量使用前未声明
             notDeclarationError(t);
         else
             // 已存在符号表中
-            st_insert(t->attr.ch,
-                      "function",
-                      t->location.first_line,
-                      0);
-
+            insertLineList(l, t->location.first_line);
         break;
     case varDeclaration:
+        if (strcmp(t->childrenNode[0]->attr.ch, "int") != 0)
+        {
+            invalidRedeclarationError(t);
+            break;
+        }
         STNode stn = t->childrenNode[1];
         BucketList l = st_lookup(stn->attr.ch, &stn->location);
+        while (1 != compareScope(getTop(), &stn->location))
+            pop();
+
         if (NULL == l)
-            //不在符号表中
-            st_insert(stn->attr.ch,
-                      t->childrenNode[0]->attr.ch,
-                      stn->location.first_line,
-                      location++);
+        { //不在符号表中
+            insertBucketList(stn->attr.ch,
+                             t->childrenNode[0]->attr.ch,
+                             stn->location.first_line,
+                             location++);
+        }
         else
         { // 已存在符号表中
-            while (-2 == compareScope(getTop(), &stn->location))
-                pop();
-
-            if (1 == compareScope(getTop(), &stn->location))
-            {
-                int result = compareScope(getTop(), &l->scope);
-                if (0 == result)
-                    //重复声明变量
-                    varRedeclarationError(t);
-                else if (-1 == result)
-                    //声明局部变量
-                    st_insert(stn->attr.ch,
-                              t->childrenNode[0]->attr.ch,
-                              stn->location.first_line,
-                              location++);
-            }
+            int result = compareScope(getTop(), &l->scope);
+            if (0 == result)
+                //重复声明变量
+                varRedeclarationError(t);
+            else if (-1 == result)
+                //声明局部变量
+                insertBucketList(stn->attr.ch,
+                                 t->childrenNode[0]->attr.ch,
+                                 stn->location.first_line,
+                                 location++);
         }
         break;
     case varType:
         /*main.cpp:8:4: error: 'b' was not declared in this scope
     8 |    b = 1;*/
-        if (NULL == st_lookup(t->attr.ch, &t->location))
+        BucketList l = st_lookup(t->attr.ch, &t->location);
+        if (NULL == l)
             //不在符号表中，变量使用前未声明
             notDeclarationError(t);
         else
             // 已存在符号表中
-            st_insert(t->attr.ch,
-                      NULL,
-                      t->location.first_line,
-                      0);
-
+            insertLineList(l, t->location.first_line);
         break;
     default:
         break;
@@ -211,7 +212,15 @@ static void typeError(STNode t, char *message)
             t->location.first_line, t->location.first_column, message);
     Error = true;
 }
-
+static void invalidRedeclarationError(STNode t)
+{
+    fprintf(stderr, "error: invalid declaration of \'%s %s\' at line %d, column %d.\n",
+            t->childrenNode[0]->attr.ch,
+            t->childrenNode[1]->attr.ch,
+            t->location.first_line,
+            t->location.first_column);
+    Error = true;
+}
 static void varRedeclarationError(STNode t)
 {
     fprintf(stderr, "error: redeclaration of \'%s %s\' at line %d, column %d.\n",

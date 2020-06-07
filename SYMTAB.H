@@ -9,12 +9,9 @@
 #ifndef _SYMTAB_H_
 #define _SYMTAB_H_
 
-/* Procedure st_insert inserts line numbers and
- * memory locations into the symbol table
- * loc = memory location is inserted only the
- * first time, otherwise ignored
- */
-void st_insert(char *name, char *type, int lineno, int loc);
+void insertBucketList(char *name, char *type, int lineno, int loc);
+
+void insertLineList(BucketList l, int lineno);
 
 /* Function st_lookup returns the memory
  * location of a variable or 0 if not found
