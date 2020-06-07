@@ -47,6 +47,7 @@ STNode createSyntaxTreeNode(
         for (int i = 0; i < MAXBRONUM; i++)
             t->brotherNode[i] = 0;
         setLoc(&t->location, 0, 0, 0, 0);
+        t->dataType = Void;
     }
     return t;
 }
@@ -65,6 +66,7 @@ STNode addBrotherNode(STNode n1, STNode n2)
         t->brotherNode[0] = n1;
         t->brotherNode[1] = n2;
         setLoc(&t->location, 0, 0, 0, 0);
+        t->dataType = Void;
     }
     return t;
 }

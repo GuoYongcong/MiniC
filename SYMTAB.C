@@ -38,7 +38,7 @@ static int hash(char *key)
     }
     return temp;
 }
-void insertBucketList(char *name, char *type, int lineno, int loc)
+void insertBucketList(char *name, char *type, int lineno, int loc, int len, STNode t)
 {
     int h = hash(name);
     BucketList l = (BucketList)malloc(sizeof(struct BucketListRec));
@@ -52,6 +52,39 @@ void insertBucketList(char *name, char *type, int lineno, int loc)
     l->memloc = loc;
     l->next = hashTable[h];
     hashTable[h] = l;
+    if (strcmp(type, "array") == 0)
+        l->attr.length = len;
+    if (strcmp(type, "function") == 0)
+    {
+        Loc scope = {t->location.first_line,
+                     t->location.first_column,
+                     t->childrenNode[2]->location.last_line,
+                     t->childrenNode[2]->location.last_column};
+        push(&scope);
+        if (strcmp(t->childrenNode[0]->attr.ch, "int") == 0)
+            l->attr.info.returnType = Integer;
+        else
+            l->attr.info.returnType = Void;
+        //params
+        STNode p = t->childrenNode[1];
+        while (defaultType == p->nodeType)
+        {
+            PL pl = (PL)malloc(sizeof(struct ParamList));
+            pl->type = Integer;
+            if (p->childrenNode[1]->childrenNode[1]->childrenNode[0] != NULL)
+                pl->type = Array;
+            pl->next = l->attr.info.params;
+            l->attr.info.params = pl;
+            p = p->childrenNode[0];
+        }
+        // p->nodeType为varDeclaration
+        PL pl = (PL)malloc(sizeof(struct ParamList));
+        pl->type = Integer;
+        if (p->childrenNode[1]->childrenNode[0] != NULL)
+            pl->type = Array;
+        pl->next = l->attr.info.params;
+        l->attr.info.params = pl;
+    }
 }
 
 void insertLineList(BucketList l, int lineno)

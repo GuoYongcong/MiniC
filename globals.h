@@ -56,6 +56,13 @@ typedef enum
     defaultType
 } NodeType;
 
+typedef enum DataType
+{
+    Void,
+    Integer,
+    Array
+} Type;
+
 //符号位置信息结构体
 typedef struct Location
 {
@@ -73,6 +80,7 @@ typedef struct Node
     struct Node *childrenNode[MAXNUM];   //孩子结点
     struct Node *brotherNode[MAXBRONUM]; //兄弟结点
     Loc location;                        //符号位置
+    Type dataType;
 } * STNode;
 
 #ifndef YYLTYPE
@@ -98,12 +106,18 @@ typedef struct LineListRec
     struct LineListRec *next;
 } * LineList;
 
-//函数的形参列表结构体
+//函数的形参结构体
 typedef struct ParamList
 {
-    char *type; //形参类型
+    Type type; //形参类型
     struct ParamList *next;
 } * PL;
+//函数信息结构体
+typedef struct FunctionInformation
+{
+    Type returnType; //函数返回值类型
+    PL params;       //函数形参类型列表
+} FuncInfo;
 
 /* The record in the bucket lists for
  * each variable, including name,
@@ -116,8 +130,8 @@ typedef struct BucketListRec
     char *name; //变量名
     char *type; //变量类型
     union {
-        int length; //数组的长度
-        PL params;  //函数的形参列表
+        int length;    //数组的长度
+        FuncInfo info; //函数信息
     } attr;
     Loc scope; //作用域
     LineList lines;

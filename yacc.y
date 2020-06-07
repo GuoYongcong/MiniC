@@ -15,6 +15,7 @@
 #include <string.h>
 #include "globals.h"
 #include "utils.h"
+#include "analyze.h"
 
 //打印语法错误
 void yyerror(const char *str);
@@ -114,9 +115,11 @@ param : tpye_specifier ID {
     $$=createSyntaxTreeNode(varDeclaration, 0, $1, n1,0);
 }
       | tpye_specifier ID LS RS {
-    STNode  n1=createSyntaxTreeNode(idType, $2, 0,0,0);
-    setLocation(&n1->location, &@2);
-    $$=createSyntaxTreeNode(varDeclaration, 0,$1, n1,0);
+    STNode  n1=createSyntaxTreeNode(defaultType, 0, 0,0,0);
+    STNode  n2=createSyntaxTreeNode(idType, $2, n1,0,0);
+    setLocation(&n2->location, &@2);
+    $$=createSyntaxTreeNode(varDeclaration, 0, $1, n2, 0);
+
 }
       ;
 compound_stmt : LC local_declaration statement_list RC {
@@ -141,16 +144,30 @@ statement : expression_stmt {$$=$1;}
 expression_stmt : expression SEM {$$=$1;}
                 | SEM {$$=0;}
                 ;
-selection_stmt : IF LP expression RP statement ELSE statement {$$=createSyntaxTreeNode(ifStmt, 0,$3, $5, $7);}
-               | IF LP expression RP statement %prec LOWER_ELSE {$$=createSyntaxTreeNode(ifStmt, 0, $3, $5,0);}
+selection_stmt : IF LP expression RP statement ELSE statement {
+    $$=createSyntaxTreeNode(ifStmt, 0,$3, $5, $7);
+    setLocation(&$3->location, &@3);
+}
+               | IF LP expression RP statement %prec LOWER_ELSE {
+    $$=createSyntaxTreeNode(ifStmt, 0, $3, $5,0);
+    setLocation(&$3->location, &@3);
+}
                ;
-iteration_stmt : WHILE LP expression RP statement {$$=createSyntaxTreeNode(whlieStmt, 0, $3, $5,0);}
+iteration_stmt : WHILE LP expression RP statement {
+    $$=createSyntaxTreeNode(whlieStmt, 0, $3, $5,0);
+    setLocation(&$3->location, &@3);
+}
                ;
-return_stmt : RETURN expression SEM {$$=createSyntaxTreeNode(returnStmt, 0 ,$2,0,0);}
+return_stmt : RETURN expression SEM {
+    $$=createSyntaxTreeNode(returnStmt, 0 ,$2,0,0);
+    setLocation(&$2->location, &@2);
+}
             | RETURN SEM {$$=createSyntaxTreeNode(returnStmt, 0, 0,0,0);}
             ;
 
-expression : var ASSI expression {$$=createSyntaxTreeNode(assignStmt, 0, $1, $3,0);}
+expression : var ASSI expression {
+    $$=createSyntaxTreeNode(assignStmt, 0, $1, $3,0);
+    setLocation(&$3->location, &@3);}
            | simple_expression {$$=$1;}
            ;
 var : ID {
@@ -193,10 +210,10 @@ term : term mulop factor {
 mulop : MUL {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       | DIV {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
       ;
-factor : LP expression RP {$$=$2;}
-       | var {$$=$1;}
-       | call {$$=$1;}
-       | NUM {$$=createSyntaxTreeNode(constType, $1, 0,0,0);}
+factor : LP expression RP {$$=$2; setLocation(&$$->location, &@2);}
+       | var {$$=$1; setLocation(&$$->location, &@1);}
+       | call {$$=$1; setLocation(&$$->location, &@1);}
+       | NUM {$$=createSyntaxTreeNode(constType, $1, 0,0,0); setLocation(&$$->location, &@1);}
        ;
 call : ID LP args RP {
     $$=createSyntaxTreeNode(funCall, $1, $3,0,0);
@@ -259,7 +276,11 @@ int main(int argc, char* argv[]) {
         yyparse();
         //打印语法树
         printTree(treeRoot);
+        //打印位置信息
         printLocation(treeRoot);
+        //构建、打印符号表
+        // buildSymtab(treeRoot);
+
         //关闭输入输出文件
         fclose(fin);
         if(fout)
