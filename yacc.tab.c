@@ -1396,37 +1396,50 @@ int yywrap(){
  */
 int main(int argc, char* argv[]) {
 
+	FILE *fin = 0, *fout = 0;
     if (argc > 1) {
-        FILE *fin = fopen(argv[1], "r");
+        fin = fopen(argv[1], "r");
         if (!fin) {
            perror(argv[1]);
            return 1;
         }
-        FILE * fout = 0;
         if(argc > 2)
             fout = fopen(argv[2], "w");
         if(fout)
             yyout = fout;
-        //从头开始分析fin文件
-        yyrestart(fin);
-        //开始分析
-        yyparse();
-        //打印语法树
-        printTree(treeRoot);
-        //打印位置信息
-        printLocation(treeRoot);
-        //构建、打印符号表
-        // buildSymtab(treeRoot);
-
-        //关闭输入输出文件
-        fclose(fin);
-        if(fout)
-            fclose(fout);
     }
     else{
-		yyparse();
-		printTree(treeRoot);
+		char s1[100], s2[100];
+		//printf("input and output filename:");
+		//scanf("%s %s", s1, s2);
+		strcpy(s1, "input.txt");
+		strcpy(s2, "output.txt");
+		printf("%s,%s\n", s1, s2);
+		fin = fopen(s1, "r");
+		if (!fin) {
+			perror(s1);
+			return 1;
+		}
+		fout = fopen(s2, "w");
+		if (fout)
+			yyout = fout;
 	}
+	//从头开始分析fin文件
+	yyrestart(fin);
+	//开始分析
+	yyparse();
+	//打印语法树
+	printTree(treeRoot);
+	//打印位置信息
+	printLocation(treeRoot);
+	//构建、打印符号表
+	buildSymtab(treeRoot);
+	//类型检查
+	typeCheck(treeRoot);
+	//关闭输入输出文件
+	fclose(fin);
+	if (fout)
+		fclose(fout);
     system("pause");
     return 0;
 }

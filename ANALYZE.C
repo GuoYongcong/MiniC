@@ -15,6 +15,12 @@
 /* counter for variable memory locations */
 static int location = 0;
 
+const char * typeString[] = {
+	"void",
+	"int",
+	"array"
+};
+
 /* Procedure traverse is a generic recursive
  * syntax tree traversal routine:
  * it applies preProc in preorder and postProc
@@ -127,6 +133,16 @@ static void invalidOperandError(char *type, Loc *loc)
     fprintf(stderr, "error: invalid operand of type \'%s\' to operator,  at line %d, column %d.\n",
             type, loc->first_line, loc->first_column);
     Error = true;
+}
+
+/*
+error: too many arguments to function 'void fun(int, int)'
+10 |     b = fun("32","323",0);*/
+static void argumentNumberError(const char *s1, Loc *loc)
+{
+	fprintf(stderr, "too %s arguments to function,  at line %d, column %d.\n",
+		s1, loc->first_line, loc->first_column);
+	Error = true;
 }
 
 /* Procedure insertNode inserts
@@ -284,44 +300,7 @@ static void insertNode(STNode t)
     default:
         break;
     }
-    // switch (t->nodekind)
-    // {
-    // case StmtK:
-    // 	switch (t->kind.stmt)
-    // 	{
-    // 	case AssignK:
-    // 	case ReadK:
-    // 		if (st_lookup(t->attr.name) == -1)
-    // 			/* not yet in table, so treat as new definition */
-    // 			st_insert(t->attr.name, t->lineno, location++);
-    // 		else
-    // 			/* already in table, so ignore locationlocation,
-    // 					   add line number of use only */
-    // 			st_insert(t->attr.name, t->lineno, 0);
-    // 		break;
-    // 	default:
-    // 		break;
-    // 	}
-    // 	break;
-    // case ExpK:
-    // 	switch (t->kind.exp)
-    // 	{
-    // 	case IdK:
-    // 		if (st_lookup(t->attr.name) == -1)
-    // 			/* not yet in table, so treat as new definition */
-    // 			st_insert(t->attr.name, t->lineno, location++);
-    // 		else
-    // 			/* already in table, so ignore location,
-    // 					   add line number of use only */
-    // 			st_insert(t->attr.name, t->lineno, 0);
-    // 		break;
-    // 	default:
-    // 		break;
-    // 	}
-    // 	break;
-    // default:
-    // 	break;
-    // }
+
 }
 
 /* Function buildSymtab constructs the symbol
@@ -358,7 +337,7 @@ static void checkNode(STNode t)
             if (Integer == t->childrenNode[0]->dataType && Integer == t->childrenNode[1]->dataType)
                 t->dataType = Integer;
         }
-        else
+        else if(t->brotherNode[1] != NULL)
             t->dataType = t->brotherNode[1]->dataType;
         break;
     case funDeclaration:
@@ -387,7 +366,37 @@ main.cpp:14:13: error: void value not ignored as it ought to be
         BucketList bl = st_lookup(t->attr.ch, &t->location);
         if (bl != NULL && strcmp(bl->type, "function") == 0)
         {
-            ;
+			PL pl = bl->attr.info.params;
+            STNode stn = t->childrenNode[0];
+			while (stn != NULL && defaultType== stn->nodeType ) {
+				if (pl != NULL)
+				{
+					if (stn->brotherNode[1]->dataType != pl->type)
+						invalidConversionError(typeString[stn->brotherNode[1]->dataType],
+							typeString[pl->type],
+							&stn->brotherNode[1]->location);
+					stn = stn->brotherNode[0];
+					pl = pl->next;
+				}
+				else
+					argumentNumberError("many", &t->location);
+			}
+			if (NULL == stn )
+			{
+				if (pl != NULL)
+					argumentNumberError("few", &t->location);
+			}
+			else {
+				if (pl != NULL)
+				{
+					if (stn->dataType != pl->type)
+						invalidConversionError(typeString[stn->dataType],
+							typeString[pl->type],
+							&stn->location);
+				}
+				else
+					argumentNumberError("many", &t->location);
+			}
         }
 
         break;
@@ -427,54 +436,7 @@ main.cpp:14:13: error: void value not ignored as it ought to be
     default:
         break;
     }
-    // switch (t->nodekind)
-    // {
-    // case ExpK:
-    // 	switch (t->kind.exp)
-    // 	{
-    // 	case OpK:
-    // 		if ((t->childrenNode[0]->type != Integer) ||
-    // 			(t->childrenNode[1]->type != Integer))
-    // 			typeError(t, "Op applied to non-integer");
-    // 		if ((t->attr.op == EQ) || (t->attr.op == LT))
-    // 			t->type = Boolean;
-    // 		else
-    // 			t->type = Integer;
-    // 		break;
-    // 	case ConstK:
-    // 	case IdK:
-    // 		t->type = Integer;
-    // 		break;
-    // 	default:
-    // 		break;
-    // 	}
-    // 	break;
-    // case StmtK:
-    // 	switch (t->kind.stmt)
-    // 	{
-    // 	case IfK:
-    // 		if (t->childrenNode[0]->type == Integer)
-    // 			typeError(t->childrenNode[0], "if test is not Boolean");
-    // 		break;
-    // 	case AssignK:
-    // 		if (t->childrenNode[0]->type != Integer)
-    // 			typeError(t->childrenNode[0], "assignment of non-integer value");
-    // 		break;
-    // 	case WriteK:
-    // 		if (t->childrenNode[0]->type != Integer)
-    // 			typeError(t->childrenNode[0], "write of non-integer value");
-    // 		break;
-    // 	case RepeatK:
-    // 		if (t->childrenNode[1]->type == Integer)
-    // 			typeError(t->childrenNode[1], "repeat test is not Boolean");
-    // 		break;
-    // 	default:
-    // 		break;
-    // 	}
-    // 	break;
-    // default:
-    // 	break;
-    // }
+ 
 }
 
 /* Procedure typeCheck performs type checking

@@ -63,6 +63,8 @@ typedef enum DataType
     Array
 } Type;
 
+
+
 //符号位置信息结构体
 typedef struct Location
 {

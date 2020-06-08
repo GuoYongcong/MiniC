@@ -71,11 +71,11 @@ void insertBucketList(char *name, char *type, int lineno, int loc, int len, STNo
         {
             PL pl = (PL)malloc(sizeof(struct ParamList));
             pl->type = Integer;
-            if (p->childrenNode[1]->childrenNode[1]->childrenNode[0] != NULL)
+            if (p->brotherNode[1]->childrenNode[1]->childrenNode[0] != NULL)
                 pl->type = Array;
             pl->next = l->attr.info.params;
             l->attr.info.params = pl;
-            p = p->childrenNode[0];
+            p = p->brotherNode[0];
         }
         // p->nodeType为varDeclaration
         PL pl = (PL)malloc(sizeof(struct ParamList));
@@ -152,11 +152,11 @@ void printSymTab(FILE *listing)
             {
                 LineList t = l->lines;
                 fprintf(listing, "%-14s ", l->name);
-                fprintf(listing, "%-10d  ", l->type);
-                fprintf(listing, "%-10d  ", l->memloc);
+                fprintf(listing, "%-10s  ", l->type);
+                fprintf(listing, "%-8d  ", l->memloc);
                 while (t != NULL)
                 {
-                    fprintf(listing, "%4d ", t->lineno);
+                    fprintf(listing, "%-4d ", t->lineno);
                     t = t->next;
                 }
                 fprintf(listing, "\n");

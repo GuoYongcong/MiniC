@@ -97,14 +97,32 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ANALYZE.C" />
+    <ClCompile Include="CGEN.C" />
+    <ClCompile Include="CODE.C" />
     <ClCompile Include="lex.yy.c" />
+    <ClCompile Include="stack.c" />
+    <ClCompile Include="SYMTAB.C" />
     <ClCompile Include="utils.c" />
     <ClCompile Include="yacc.tab.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="ANALYZE.H" />
+    <ClInclude Include="CGEN.H" />
+    <ClInclude Include="CODE.H" />
     <ClInclude Include="globals.h" />
+    <ClInclude Include="stack.h" />
+    <ClInclude Include="SYMTAB.H" />
     <ClInclude Include="utils.h" />
     <ClInclude Include="yacc.tab.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lex.l" />
+    <None Include="yacc.y" />
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="input.txt" />
+    <Text Include="output.txt" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

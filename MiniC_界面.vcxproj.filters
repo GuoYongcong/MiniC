@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav</Extensions>
     </Filter>
+    <Filter Include="Test Files">
+      <UniqueIdentifier>{015d0520-434c-4b2d-bf5e-a1082299f4c1}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="lex.yy.c">
@@ -22,6 +25,21 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="yacc.tab.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="ANALYZE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CGEN.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="CODE.C">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="stack.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="SYMTAB.C">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -35,5 +53,36 @@
     <ClInclude Include="yacc.tab.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="ANALYZE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CGEN.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="CODE.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="stack.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="SYMTAB.H">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="lex.l">
+      <Filter>Source Files</Filter>
+    </None>
+    <None Include="yacc.y">
+      <Filter>Source Files</Filter>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <Text Include="input.txt">
+      <Filter>Test Files</Filter>
+    </Text>
+    <Text Include="output.txt">
+      <Filter>Test Files</Filter>
+    </Text>
   </ItemGroup>
 </Project>
