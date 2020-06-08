@@ -58,9 +58,11 @@ typedef enum
 
 typedef enum DataType
 {
+	Unknown,
     Void,
     Integer,
-    Array
+    Array,
+	Function
 } Type;
 
 

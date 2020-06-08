@@ -108,5 +108,5 @@ NOTES            {LN}([^*]|[*]+[^*/])*[*]*{RN}
 \t                 {columnno+=3; /*yyleng等于1，需要再加3*/ }
 \n                  {columnno=1;}
 <<EOF>>            {yyterminate();}
-.                  { fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
+.                  { fprintf(stderr, "lexical error, illegal symbol -> \'%s\' at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
 %%

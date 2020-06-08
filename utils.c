@@ -47,7 +47,7 @@ STNode createSyntaxTreeNode(
         for (int i = 0; i < MAXBRONUM; i++)
             t->brotherNode[i] = 0;
         setLoc(&t->location, 0, 0, 0, 0);
-        t->dataType = Void;
+        t->dataType = Unknown;
     }
     return t;
 }
@@ -286,37 +286,41 @@ int compareScope(Loc *loc1, Loc *loc2)
         if (!ll1 && !ll2)
             result = 1;
         else if (ll2)
-            if (!lc1 && !lc2)
+            if (!lc1)
                 result = 1;
     }
     else if (fl2)
     {
         if (ll1)
         {
-            if (!fc1 && !fc2)
+            if (!fc1)
                 result = -1;
         }
         else if (ll2)
         {
             if (fc1)
             {
-                if (!lc1 && !lc2)
+                if (!lc1)
                     result = 1;
             }
             else if (fc2)
             {
-                if (lc2)
-                    result = 0;
+				if (lc1)
+					result = -1;
+				else if (lc2)
+					result = 0;
+				else
+					result = 1;
             }
             else
             {
-                if (lc1)
+                if (lc1 || lc2)
                     result = -1;
             }
         }
         else
         {
-            if (fc1)
+            if (fc1 || fc2)
                 result = 1;
         }
     }
@@ -325,7 +329,7 @@ int compareScope(Loc *loc1, Loc *loc2)
         if (ll1)
             result = -1;
         else if (ll2)
-            if (lc1)
+            if (lc1 || lc2)
                 result = -1;
     }
     if (ll_fl1)
@@ -340,21 +344,21 @@ int compareScope(Loc *loc1, Loc *loc2)
             result = -2;
     // if (fl1 && ll3)
     //     result = 1;
-    // if (fl2 && ll2 && fc1 && lc3)
+    // if (fl2 && ll2 && (fc1 && !lc1 || fc2&&lc3))
     //     result = 1;
-    // if (fl2 && ll3 && fc1)
+    // if (fl2 && ll3 && (fc1||fc2))
     //     result = 1;
-    // if (fl1 && ll2 && lc3)
+    // if (fl1 && ll2 && !lc1)
     //     result = 1;
     // if (fl2 && ll2 && fc2 && lc2)
     //     result = 0;
     // if (fl3 && ll1)
     //     result = -1;
-    // if (fl2 && ll2 && fc3 && lc1)
+    // if (fl2 && ll2 && (fc3 && !lc3 || fc2&&lc1))
     //     result = -1;
-    // if (fl2 && ll1 && fc3)
+    // if (fl2 && ll1 && !fc1)
     //     result = -1;
-    // if (fl3 && ll2 && lc1)
+    // if (fl3 && ll2 && (lc1||lc2))
     //     result = -1;
     // if (ll_fl1 || fl_ll1)
     //     result = -2;

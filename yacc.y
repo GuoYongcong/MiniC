@@ -79,7 +79,7 @@ declaration_list : declaration_list declaration {$$=addBrotherNode($1, $2);}
                  | expression {$$=$1;}
                  | declaration {$$=$1;}
                  ;
-declaration : var_declaration {$$=$1;}
+declaration : var_declaration {$$=$1; setLocation(&$$->location, &@1);}
             | fun_declaration {$$=$1;}
             ;
 var_declaration : tpye_specifier ID SEM {
@@ -106,8 +106,8 @@ fun_declaration : tpye_specifier ID LP params RP compound_stmt {
 params : param_list {$$=$1;}
        | VOID {$$=0;}
        ;
-param_list : param_list COM param {$$=addBrotherNode($1, $3);}
-           | param {$$=$1;}
+param_list : param_list COM param {$$=addBrotherNode($1, $3); setLocation(&$3->location, &@3);}
+           | param {$$=$1; setLocation(&$$->location, &@1);}
            ;
 param : tpye_specifier ID {
     STNode  n1=createSyntaxTreeNode(idType, $2, 0,0,0);
@@ -126,7 +126,10 @@ compound_stmt : LC local_declaration statement_list RC {
     $$=createSyntaxTreeNode(compoundStmt, 0,$2, $3,0);
 }
               ;
-local_declaration : local_declaration var_declaration {$$=addBrotherNode($1, $2); }
+local_declaration : local_declaration var_declaration {
+	$$=addBrotherNode($1, $2);
+	setLocation(&$2->location, &@2);
+}
                   | {$$=0;}
                   ;
 statement_list : statement_list statement {$$=addBrotherNode($1, $2); }
@@ -183,6 +186,8 @@ simple_expression : additive_expression {$$=$1;}
                   | additive_expression relop additive_expression {
     STNode  n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
     $$=addBrotherNode($2, n);
+	setLocation(&$1->location, &@1);
+	setLocation(&$3->location, &@3);
 }
                   ;
 relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
@@ -195,6 +200,8 @@ relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
 additive_expression : additive_expression addop term{
     STNode  n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
     $$=addBrotherNode($2, n);
+	setLocation(&$1->location, &@1);
+	setLocation(&$3->location, &@3);
 }
                     | term {$$=$1;}
                     ;
@@ -204,6 +211,8 @@ addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
 term : term mulop factor {
     STNode  n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
     $$=addBrotherNode($2, n);
+	setLocation(&$1->location, &@1);
+	setLocation(&$3->location, &@3);
 }
      | factor {$$=$1;}
      ;
@@ -235,7 +244,7 @@ arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
  * &@return 无返回值
  */
 void yyerror(const char *str){
-    fprintf(stderr,"%s, unexpected token -> %s at line %d, column %d.\n",
+    fprintf(stderr,"%s, unexpected token -> \'%s\' at line %d, column %d.\n",
     str, yytext,yylineno, columnno-yyleng);
 }
 
@@ -272,9 +281,11 @@ int main(int argc, char* argv[]) {
             yyout = fout;
     }
     else{
-		printf("input and output filename:");
+		//printf("input and output filename:");
 		char s1[100], s2[100];
-		scanf("%s %s", s1, s2);
+		//scanf("%s %s", s1, s2);
+		strcpy(s1,"input.txt");
+		strcpy(s2,"output.txt");
 		printf("%s,%s\n",s1,s2);
 		fin = fopen(s1, "r");
 		if (!fin) {

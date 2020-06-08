@@ -868,7 +868,7 @@ case YY_STATE_EOF(INITIAL):
 case 32:
 YY_RULE_SETUP
 #line 111 "lex.l"
-{ fprintf(stderr, "lexical error, illegal symbol -> %s at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
+{ fprintf(stderr, "lexical error, illegal symbol -> \'%s\' at line %d, column %d.\n",yytext,yylineno, columnno-yyleng);}
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
