@@ -17,8 +17,7 @@
 //添加位置信息
 void setLoc(Loc *loc, int fl, int fc, int ll, int lc);
 
-bool TraceAnalyze = true;
-bool Error = false;
+
 
 /**
  * 创建语法树结点
@@ -125,7 +124,7 @@ static void backspaces(void)
 }
 
 /**
- * 20个打印不同类型结点内容的函数
+ * 15个打印不同类型结点内容的函数
  * @param  tree     语法树的某个结点
  */
 void fun_ifStmt(STNode tree) { fprintf(yyout, "if\n"); }
@@ -144,17 +143,17 @@ void fun_funDeclaration(STNode tree) { fprintf(yyout, "funDeclaration: %s\n", tr
 
 void fun_funCall(STNode tree) { fprintf(yyout, "call: %s\n", tree->attr.ch); }
 
-void fun_expressionType(STNode tree) { fprintf(yyout, "expression\n"); }
-
-void fun_declarationList(STNode tree) { fprintf(yyout, "declarationList\n"); }
-
-void fun_paramList(STNode tree) { fprintf(yyout, "paramList\n"); }
-
-void fun_localDeclaration(STNode tree) { fprintf(yyout, "localDeclaration\n"); }
-
-void fun_statementList(STNode tree) { fprintf(yyout, "statementList\n"); }
-
-void fun_argList(STNode tree) { fprintf(yyout, "argList\n"); }
+//void fun_expressionType(STNode tree) { fprintf(yyout, "expression\n"); }
+//
+//void fun_declarationList(STNode tree) { fprintf(yyout, "declarationList\n"); }
+//
+//void fun_paramList(STNode tree) { fprintf(yyout, "paramList\n"); }
+//
+//void fun_localDeclaration(STNode tree) { fprintf(yyout, "localDeclaration\n"); }
+//
+//void fun_statementList(STNode tree) { fprintf(yyout, "statementList\n"); }
+//
+//void fun_argList(STNode tree) { fprintf(yyout, "argList\n"); }
 
 void fun_opType(STNode tree) { fprintf(yyout, "op: %s\n", tree->attr.ch); }
 
@@ -174,9 +173,8 @@ void fun_defaultType(STNode tree) { backspaces(); }
 void (*funs[])(STNode) =
     {
         fun_ifStmt, fun_whlieStmt, fun_assignStmt, fun_returnStmt, fun_compoundStmt,
-        fun_varDeclaration, fun_funDeclaration, fun_funCall, fun_expressionType,
-        fun_declarationList, fun_paramList, fun_localDeclaration, fun_statementList,
-        fun_argList, fun_opType, fun_constType, fun_idType, fun_typeType, fun_varType,
+        fun_varDeclaration, fun_funDeclaration, fun_funCall, 
+		fun_opType, fun_constType, fun_idType, fun_typeType, fun_varType,
         fun_program, fun_defaultType};
 
 /**
@@ -199,50 +197,6 @@ void printTree(STNode tree)
         UNINDENT;
         for (int i = 0; i < MAXBRONUM; i++)
             printTree(tree->brotherNode[i]);
-    }
-}
-
-void printLocation(STNode tree)
-{
-    if (tree != 0)
-    {
-        switch (tree->nodeType)
-        {
-        case idType:
-            fprintf(yyout, "id: %s, location: %d:%d, %d:%d\n",
-                    tree->attr.ch,
-                    tree->location.first_line,
-                    tree->location.first_column,
-                    tree->location.last_line,
-                    tree->location.last_column);
-            break;
-        case compoundStmt:
-            fprintf(yyout, "compoundStmt, location: %d:%d, %d:%d\n",
-                    tree->location.first_line,
-                    tree->location.first_column,
-                    tree->location.last_line,
-                    tree->location.last_column);
-
-            break;
-        case funDeclaration:
-            if (0 == tree->childrenNode[0])
-                break;
-            fprintf(yyout, "funcion: %s, location: %d:%d, %d:%d, returnType: %s\n",
-                    tree->attr.ch,
-                    tree->location.first_line,
-                    tree->location.first_column,
-                    tree->location.last_line,
-                    tree->location.last_column,
-                    tree->childrenNode[0]->attr.ch);
-            break;
-
-        default:
-            break;
-        }
-        for (int i = 0; i < MAXNUM; i++)
-            printLocation(tree->childrenNode[i]);
-        for (int i = 0; i < MAXBRONUM; i++)
-            printLocation(tree->brotherNode[i]);
     }
 }
 

@@ -25,8 +25,6 @@ void copyLocation(Loc *loc1, Loc *loc2);
 //打印语法树
 void printTree(STNode);
 
-void printLocation(STNode);
-
 // 比较作用域
 // loc1包含loc2，返回1;
 // loc1与loc2相同，返回0;

@@ -41,12 +41,12 @@ typedef enum
     varDeclaration,
     funDeclaration,
     funCall,
-    expressionType,
-    declarationList,
-    paramList,
-    localDeclaration,
-    statementList,
-    argList,
+    //expressionType,
+    //declarationList,
+    //paramList,
+    //localDeclaration,
+    //statementList,
+    //argList,
     opType,
     constType,
     idType,
@@ -152,4 +152,9 @@ extern FILE *yyin, *yyout;
 extern bool TraceAnalyze;
 extern bool Error;
 extern YYLTYPE yylloc;
+extern FILE *code;
+extern bool TraceCode;
+//保留字:input和output
+extern const char * input;
+extern const char * output;
 #endif

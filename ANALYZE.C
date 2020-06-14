@@ -22,6 +22,10 @@ const char * typeString[] = {
 	"array",
 	"function"
 };
+//保留字:input和output
+const char * input = "input";
+const char * output = "output";
+
 
 typedef struct LocationList
 {
@@ -193,9 +197,16 @@ static void insertNode(STNode t)
 	{
 	case program:
 	case compoundStmt:
+		//进入新的作用域
 		push(&t->location);
 		break;
 	case funDeclaration:
+	{
+		if (strcmp(t->attr.ch, input) == 0 || strcmp(t->attr.ch, output) == 0) {
+			//函数名跟保留字input或output冲突
+			funRedeclarationError(t);
+			break;
+		}
 		if (NULL == st_lookup(t->attr.ch, &t->location))
 		{
 			//不在符号表中
@@ -212,8 +223,13 @@ static void insertNode(STNode t)
 			// 已存在符号表中，重复声明函数
 			funRedeclarationError(t);
 		break;
+	}
 	case funCall:
 	{
+		if (strcmp(t->attr.ch, input) == 0 || strcmp(t->attr.ch, output) == 0) {
+			//函数名跟保留字input或output相同，使用前无需声明，也不用添加到符号表
+			break;
+		}
 		BucketList l = st_lookup(t->attr.ch, &t->location);
 		if (NULL == l)
 			//不在符号表中，变量使用前未声明
@@ -247,15 +263,17 @@ static void insertNode(STNode t)
 			//不在符号表中
 			if (stn->childrenNode[0] != NULL)
 			{
+				//数组
 				int length = 0;
 				if (constType == stn->childrenNode[0]->nodeType)
 					length = stn->childrenNode[0]->attr.value;
 				insertBucketList(stn->attr.ch,
 					typeString[Array],
 					stn->location.first_line,
-					location++,
+					location,
 					length,
 					NULL);
+				location += length;
 			}
 			else
 				insertBucketList(stn->attr.ch,
@@ -409,6 +427,28 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 		break;
 	case funCall:
 	{
+		if (strcmp(t->attr.ch, input) == 0) {
+			//input函数没有参数
+			if (t->childrenNode[0] != NULL)
+				argumentNumberError("many", &t->location);
+			break;
+		}
+		else if (strcmp(t->attr.ch, output) == 0) {
+			//output函数有且只有一个参数，且参数类型是int
+			if (NULL == t->childrenNode[0])
+				//参数太少
+				argumentNumberError("few", &t->location);
+			else if (defaultType == t->childrenNode[0]->nodeType)
+				//参数太多
+				argumentNumberError("many", &t->location);
+			else if (t->childrenNode[0]->dataType != Integer)
+				//参数类型不是int
+				invalidConversionError(
+					typeString[t->childrenNode[0]->dataType],
+					typeString[Integer],
+					&t->childrenNode[0]->location);
+			break;
+		}
 		BucketList bl = st_lookup(t->attr.ch, &t->location);
 		if (bl != NULL && strcmp(bl->type, typeString[Function]) == 0)
 		{
@@ -504,7 +544,7 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 
 static void checkBrotherNode(STNode t) {
 	if (defaultType == t->nodeType && t->brotherNode[1] != NULL)
-			t->dataType = t->brotherNode[1]->dataType;
+		t->dataType = t->brotherNode[1]->dataType;
 }
 
 /* Procedure typeCheck performs type checking

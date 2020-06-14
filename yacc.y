@@ -16,6 +16,7 @@
 #include "globals.h"
 #include "utils.h"
 #include "analyze.h"
+#include "cgen.h"
 
 //打印语法错误
 void yyerror(const char *str);
@@ -28,7 +29,10 @@ extern char *yytext;
 extern int yyleng;
 //语法树根结点
 STNode  treeRoot = 0;
-
+bool TraceCode = true;
+FILE * code;
+bool TraceAnalyze = true;
+bool Error = false;
 %}
 %union{
     int value;
@@ -277,8 +281,10 @@ int main(int argc, char* argv[]) {
         }
         if(argc > 2)
             fout = fopen(argv[2], "w");
-        if(fout)
+        if(fout){
             yyout = fout;
+			code = fout;
+		}
     }
     else{
 		//printf("input and output filename:");
@@ -293,8 +299,10 @@ int main(int argc, char* argv[]) {
 			return 1;
 		}
 		fout = fopen(s2, "w");
-		if (fout)
-			yyout = fout;
+		if(fout){
+            yyout = fout;
+			code = fout;
+		}
 	}
 	//从头开始分析fin文件
 	yyrestart(fin);
@@ -302,12 +310,12 @@ int main(int argc, char* argv[]) {
 	yyparse();
 	//打印语法树
 	printTree(treeRoot);
-	//打印位置信息
-	printLocation(treeRoot);
 	//构建、打印符号表
 	buildSymtab(treeRoot);
 	//类型检查
 	typeCheck(treeRoot);
+	//打印中间代码
+	codeGen(treeRoot,"codeFile");
 	//关闭输入输出文件
 	fclose(fin);
 	if (fout)
