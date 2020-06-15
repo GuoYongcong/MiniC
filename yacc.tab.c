@@ -997,7 +997,7 @@ case 31:
 case 32:
 #line 163 "yacc.y"
 {
-    yyval.node=createSyntaxTreeNode(whlieStmt, 0, yyvsp[-2].node, yyvsp[0].node,0);
+    yyval.node=createSyntaxTreeNode(whileStmt, 0, yyvsp[-2].node, yyvsp[0].node,0);
     setLocation(&yyvsp[-2].node->location, &yylsp[-2]);
 ;
     break;}
@@ -1380,9 +1380,9 @@ yyerrhandle:
 
 /**
  * 打印语法错误
- * &@method yyerror
- * &@param  str 错误信息
- * &@return 无返回值
+ * @method yyerror
+ * @param  str 错误信息
+ * @return 无返回值
  */
 void yyerror(const char *str){
     fprintf(stderr,"%s, unexpected token -> \'%s\' at line %d, column %d.\n",
@@ -1391,17 +1391,17 @@ void yyerror(const char *str){
 
 /**
  * 此函数在每一个输入文件被解析完毕时被调用
- * &@method yywrap
- * &@return 如果返回值为0，允许打开其它的文件继续解析；如果返回值为1，则结束解析文件。
+ * @method yywrap
+ * @return 如果返回值为0，允许打开其它的文件继续解析；如果返回值为1，则结束解析文件。
  */
 int yywrap(){
     return 1;
 }
 /**
  * 程序入口函数
- * &@method main
- * &@param  int   argc   命令行运行此程序时输入的参数个数
- * &@param  char* argv[]    输入的参数数组
+ * @method main
+ * @param  int   argc   命令行运行此程序时输入的参数个数
+ * @param  char* argv[]    输入的参数数组
  * 调用注意事项：参数个数为1时，默认标准输入输出；
  * 参数个数为2时，argv[1]为输入文件，输出为默认；
  * 参数个数为3时，argv[1]为输入文件，argv[2]为输出文件
@@ -1410,26 +1410,34 @@ int yywrap(){
 int main(int argc, char* argv[]) {
 
 	FILE *fin = 0, *fout = 0;
+	code = stdout;
     if (argc > 1) {
         fin = fopen(argv[1], "r");
         if (!fin) {
            perror(argv[1]);
            return 1;
         }
-        if(argc > 2)
+        if(argc > 2){
             fout = fopen(argv[2], "w");
-        if(fout){
-            yyout = fout;
-			code = fout;
+			if(fout){
+				yyout = fout;
+				code = fout;
+			}
+			if(argc>3){
+				code = fopen(argv[3], "w");
+				if(!code)
+					code = stdout;
+			}
 		}
     }
     else{
 		//printf("input and output filename:");
-		char s1[100], s2[100];
-		//scanf("%s %s", s1, s2);
+		char s1[100], s2[100], s3[100];
+		//scanf("%s %s %s", s1, s2, s3);
 		strcpy(s1,"input.txt");
 		strcpy(s2,"output.txt");
-		printf("%s,%s\n",s1,s2);
+		strcpy(s3,"codefile.tm");
+		printf("%s,%s\n",s1,s2,s3);
 		fin = fopen(s1, "r");
 		if (!fin) {
 			perror(s1);
@@ -1438,8 +1446,10 @@ int main(int argc, char* argv[]) {
 		fout = fopen(s2, "w");
 		if(fout){
             yyout = fout;
-			code = fout;
 		}
+		code = fopen(s3, "w");
+		if(!code)
+			code = stdout;
 	}
 	//从头开始分析fin文件
 	yyrestart(fin);
@@ -1457,6 +1467,8 @@ int main(int argc, char* argv[]) {
 	fclose(fin);
 	if (fout)
 		fclose(fout);
+	if(code)
+		fclose(code);
     system("pause");
     return 0;
 }

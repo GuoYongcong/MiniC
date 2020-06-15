@@ -1,1 +1,1 @@
-a.exe input.txt output.txt
+a.exe input.txt output.txt codefile.tm

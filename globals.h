@@ -34,7 +34,7 @@ typedef union {
 typedef enum
 {
     ifStmt,
-    whlieStmt,
+    whileStmt,
     assignStmt,
     returnStmt,
     compoundStmt,

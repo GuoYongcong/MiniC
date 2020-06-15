@@ -161,7 +161,7 @@ selection_stmt : IF LP expression RP statement ELSE statement {
 }
                ;
 iteration_stmt : WHILE LP expression RP statement {
-    $$=createSyntaxTreeNode(whlieStmt, 0, $3, $5,0);
+    $$=createSyntaxTreeNode(whileStmt, 0, $3, $5,0);
     setLocation(&$3->location, &@3);
 }
                ;
@@ -273,26 +273,34 @@ int yywrap(){
 int main(int argc, char* argv[]) {
 
 	FILE *fin = 0, *fout = 0;
+	code = stdout;
     if (argc > 1) {
         fin = fopen(argv[1], "r");
         if (!fin) {
            perror(argv[1]);
            return 1;
         }
-        if(argc > 2)
+        if(argc > 2){
             fout = fopen(argv[2], "w");
-        if(fout){
-            yyout = fout;
-			code = fout;
+			if(fout){
+				yyout = fout;
+				code = fout;
+			}
+			if(argc>3){
+				code = fopen(argv[3], "w");
+				if(!code)
+					code = stdout;
+			}
 		}
     }
     else{
 		//printf("input and output filename:");
-		char s1[100], s2[100];
-		//scanf("%s %s", s1, s2);
+		char s1[100], s2[100], s3[100];
+		//scanf("%s %s %s", s1, s2, s3);
 		strcpy(s1,"input.txt");
 		strcpy(s2,"output.txt");
-		printf("%s,%s\n",s1,s2);
+		strcpy(s3,"codefile.tm");
+		printf("%s,%s\n",s1,s2,s3);
 		fin = fopen(s1, "r");
 		if (!fin) {
 			perror(s1);
@@ -301,8 +309,10 @@ int main(int argc, char* argv[]) {
 		fout = fopen(s2, "w");
 		if(fout){
             yyout = fout;
-			code = fout;
 		}
+		code = fopen(s3, "w");
+		if(!code)
+			code = stdout;
 	}
 	//从头开始分析fin文件
 	yyrestart(fin);
@@ -320,6 +330,8 @@ int main(int argc, char* argv[]) {
 	fclose(fin);
 	if (fout)
 		fclose(fout);
+	if(code)
+		fclose(code);
     system("pause");
     return 0;
 }

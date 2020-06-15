@@ -435,18 +435,21 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 		}
 		else if (strcmp(t->attr.ch, func_output) == 0) {
 			//output函数有且只有一个参数，且参数类型是int
-			if (NULL == t->childrenNode[0])
+			STNode p = t->childrenNode[0];
+			if (NULL == p)
 				//参数太少
 				argumentNumberError("few", &t->location);
-			else if (defaultType == t->childrenNode[0]->nodeType)
+			else if (defaultType == p->nodeType 
+				&& p->brotherNode[0] != NULL 
+				&& p->brotherNode[0]->nodeType!=opType)
 				//参数太多
 				argumentNumberError("many", &t->location);
-			else if (t->childrenNode[0]->dataType != Integer)
+			else if (p->dataType != Integer)
 				//参数类型不是int
 				invalidConversionError(
-					typeString[t->childrenNode[0]->dataType],
+					typeString[p->dataType],
 					typeString[Integer],
-					&t->childrenNode[0]->location);
+					&p->location);
 			break;
 		}
 		BucketList bl = st_lookup(t->attr.ch, &t->location);
@@ -522,7 +525,7 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 	case compoundStmt:
 		break;
 	case ifStmt:
-	case whlieStmt:
+	case whileStmt:
 		if (Integer != t->childrenNode[0]->dataType)
 			invalidConversionError(
 				typeString[t->childrenNode[0]->dataType],

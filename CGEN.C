@@ -340,25 +340,28 @@ static void cGen(STNode  tree)
 			emitRestore();
 			if (TraceCode)  emitComment("<- if");
 			break;
-		case whlieStmt:
-			if (TraceCode) emitComment("-> whlie");
+		case whileStmt:
+			if (TraceCode) emitComment("-> while");
 			p1 = tree->childrenNode[0];
 			p2 = tree->childrenNode[1];
 			savedLoc1 = emitSkip(0);
-			emitComment("whlie: jump after body comes back here");
+			emitComment("while: jump after body comes back here");
 			/* generate code for test */
 			cGen(p1);
 			savedLoc2 = emitSkip(1);
-			emitComment("whlie: jump to end belongs here");
+			emitComment("while: jump to end belongs here");
 			/* generate code for body */
 			cGen(p2);
-			emitRM_Abs("LDC", pc, savedLoc1, "whlie: jmp back to test");
+			emitRM_Abs("LDA", pc, savedLoc1, "while: jmp back to test");
 			currentLoc = emitSkip(0);
 			emitBackup(savedLoc2);
-			emitRM_Abs("JEQ", ac, currentLoc, "whlie: jmp to end");
-			if (TraceCode)  emitComment("<- whlie");
+			emitRM_Abs("JEQ", ac, currentLoc, "while: jmp to end");
+			emitRestore();
+			if (TraceCode)  emitComment("<- while");
 			break;
+
 		case returnStmt:
+			cGen(tree->childrenNode[0]);
 			break;
 
 		default:

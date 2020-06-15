@@ -79,6 +79,9 @@
     <None Include="yacc.y">
       <Filter>Source Files</Filter>
     </None>
+    <None Include="codefile.tm">
+      <Filter>Test Files</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <Text Include="input.txt">

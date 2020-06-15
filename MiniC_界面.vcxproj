@@ -118,6 +118,7 @@
     <ClInclude Include="yacc.tab.h" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="codefile.tm" />
     <None Include="lex.l" />
     <None Include="yacc.y" />
   </ItemGroup>

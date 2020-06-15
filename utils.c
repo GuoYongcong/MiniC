@@ -129,7 +129,7 @@ static void backspaces(void)
  */
 void fun_ifStmt(STNode tree) { fprintf(yyout, "if\n"); }
 
-void fun_whlieStmt(STNode tree) { fprintf(yyout, "while\n"); }
+void fun_whileStmt(STNode tree) { fprintf(yyout, "while\n"); }
 
 void fun_assignStmt(STNode tree) { fprintf(yyout, "assign\n"); }
 
@@ -172,7 +172,7 @@ void fun_defaultType(STNode tree) { backspaces(); }
 //函数指针数组
 void (*funs[])(STNode) =
     {
-        fun_ifStmt, fun_whlieStmt, fun_assignStmt, fun_returnStmt, fun_compoundStmt,
+        fun_ifStmt, fun_whileStmt, fun_assignStmt, fun_returnStmt, fun_compoundStmt,
         fun_varDeclaration, fun_funDeclaration, fun_funCall, 
 		fun_opType, fun_constType, fun_idType, fun_typeType, fun_varType,
         fun_program, fun_defaultType};
