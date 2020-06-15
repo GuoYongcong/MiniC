@@ -121,34 +121,9 @@ BucketList st_lookup(char *name, Loc *loc)
 {
 	int h = hash(name);
 	BucketList l = hashTable[h];
-	BucketList p = NULL;
-	// while (l != NULL)
-	// {
-	//     while ((l != NULL) && (strcmp(name, l->name) != 0))
-	//         l = l->next;
-	//     if (l == NULL)
-	//         return p;
-	//     else
-	//     {
-	//         int result = compareScope(&l->scope, loc);
-	//         if (1 == result)
-	//         {
-	//             p = l;
-	//             l = l->inner;
-	//         }
-	//         else if (-2 == result)
-	//         {
-	//             l = l->next;
-	//         }
-	//     }
-	// }
-
 	while ((l != NULL) && (strcmp(name, l->name) != 0) && compareScope(&l->scope, loc) != 1)
 		l = l->next;
-	if (l == NULL)
-		return NULL;
-	else
-		return l;
+	return l;
 }
 
 /* Procedure printSymTab prints a formatted

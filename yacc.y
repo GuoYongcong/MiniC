@@ -322,10 +322,12 @@ int main(int argc, char* argv[]) {
 	printTree(treeRoot);
 	//构建、打印符号表
 	buildSymtab(treeRoot);
-	//类型检查
-	typeCheck(treeRoot);
-	//打印中间代码
-	codeGen(treeRoot,"codeFile");
+	if(!Error)
+		//类型检查
+		typeCheck(treeRoot);
+	if(!Error)
+		//打印中间代码
+		codeGen(treeRoot,"codeFile");
 	//关闭输入输出文件
 	fclose(fin);
 	if (fout)

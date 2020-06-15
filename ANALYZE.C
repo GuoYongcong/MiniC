@@ -339,6 +339,10 @@ static void insertNode(STNode t)
 void buildSymtab(STNode syntaxTree)
 {
 	traverse(syntaxTree, insertNode, nullProc, nullProc);
+	BucketList l = st_lookup("main", &syntaxTree->location);
+	if (NULL == l || strcmp(l->type, typeString[Function]) != 0)
+		//程序没有main函数
+		fprintf(stderr, "error: program has no main function.\n");
 	if (TraceAnalyze)
 	{
 		fprintf(yyout, "\nSymbol table:\n\n");
