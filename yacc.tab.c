@@ -1051,27 +1051,27 @@ case 40:
     break;}
 case 41:
 #line 197 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = LESS_OR_EQUAL;;
     break;}
 case 42:
 #line 198 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = LESS;;
     break;}
 case 43:
 #line 199 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = GREA_OR_EQUAL;;
     break;}
 case 44:
 #line 200 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = GREA;;
     break;}
 case 45:
 #line 201 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = EQUAL;;
     break;}
 case 46:
 #line 202 "yacc.y"
-{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{ yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = NOT_EQUAL;;
     break;}
 case 47:
 #line 204 "yacc.y"
@@ -1088,11 +1088,11 @@ case 48:
     break;}
 case 49:
 #line 212 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = ADD;;
     break;}
 case 50:
 #line 213 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = SUB;;
     break;}
 case 51:
 #line 215 "yacc.y"
@@ -1109,11 +1109,11 @@ case 52:
     break;}
 case 53:
 #line 223 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = MUL;;
     break;}
 case 54:
 #line 224 "yacc.y"
-{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0);;
+{yyval.node=createSyntaxTreeNode(opType, yyvsp[0].ch, 0,0,0); yyval.node->dataType = DIV;;
     break;}
 case 55:
 #line 226 "yacc.y"

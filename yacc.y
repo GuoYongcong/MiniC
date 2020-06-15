@@ -194,12 +194,12 @@ simple_expression : additive_expression {$$=$1;}
 	setLocation(&$3->location, &@3);
 }
                   ;
-relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | LESS { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | GREA_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | GREA { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+relop : LESS_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = LESS_OR_EQUAL;}
+      | LESS { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = LESS;}
+      | GREA_OR_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = GREA_OR_EQUAL;}
+      | GREA { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = GREA;}
+      | EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = EQUAL;}
+      | NOT_EQUAL { $$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = NOT_EQUAL;}
       ;
 additive_expression : additive_expression addop term{
     STNode  n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
@@ -209,8 +209,8 @@ additive_expression : additive_expression addop term{
 }
                     | term {$$=$1;}
                     ;
-addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+addop : ADD {$$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = ADD;}
+      | SUB {$$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = SUB;}
       ;
 term : term mulop factor {
     STNode  n = createSyntaxTreeNode(defaultType,0, $1, $3, 0);
@@ -220,8 +220,8 @@ term : term mulop factor {
 }
      | factor {$$=$1;}
      ;
-mulop : MUL {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
-      | DIV {$$=createSyntaxTreeNode(opType, $1, 0,0,0);}
+mulop : MUL {$$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = MUL;}
+      | DIV {$$=createSyntaxTreeNode(opType, $1, 0,0,0); $$->dataType = DIV;}
       ;
 factor : LP expression RP {$$=$2; setLocation(&$$->location, &@2);}
        | var {$$=$1; setLocation(&$$->location, &@1);}

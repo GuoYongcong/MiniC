@@ -11,6 +11,7 @@
 #include "symtab.h"
 #include "code.h"
 #include "cgen.h"
+#include "yacc.tab.h"
 
 /* tmpOffset is the memory offset for temps
    It is decremented each time a temp is
@@ -166,7 +167,7 @@ static void cGen(STNode  tree)
 			if (TraceCode)  emitComment("<- Const");
 			break;
 		case varType:
-			list = st_lookup(tree->attr.ch,&tree->location);
+			list = st_lookup(tree->attr.ch, &tree->location);
 			if (strcmp(list->type, typeString[Integer]) == 0) {
 				//int类型变量
 				if (TraceCode) emitComment("-> Id");
@@ -183,6 +184,54 @@ static void cGen(STNode  tree)
 				emitRO("ADD", ac, ac, ac1, "op +");
 				emitRM("LDR", ac, ac, gp, "load id value");
 				if (TraceCode) emitComment("<- Array");
+			}
+			break;
+		case defaultType:
+			if (tree->brotherNode[0] != NULL && tree->brotherNode[1] != NULL) {
+				if (opType == tree->brotherNode[0]->nodeType) {
+					//简单表达式
+					if (TraceCode) emitComment("-> Op");
+					p1 = tree->brotherNode[1]->childrenNode[0];
+					p2 = tree->brotherNode[1]->childrenNode[1];
+					//左操作数
+					cGen(p1);
+					emitRM("ST", ac, tmpOffset--, mp, "op: push left");
+					//右操作数
+					cGen(p2);
+					emitRM("LD", ac1, ++tmpOffset, mp, "op: load left");
+					switch (tree->brotherNode[0]->dataType) {
+					case ADD:
+						emitRO("ADD", ac, ac1, ac, "op +");
+						break;
+					case SUB:
+						emitRO("SUB", ac, ac1, ac, "op -");
+						break;
+					case MUL:
+						emitRO("MUL", ac, ac1, ac, "op *");
+						break;
+					case DIV:
+						emitRO("DIV", ac, ac1, ac, "op /");
+						break;
+					case LESS:
+						emitRO("SUB", ac, ac1, ac, "op <");
+						emitRM("JLT", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
+						break;
+					case EQUAL:
+						emitRO("SUB", ac, ac1, ac, "op ==");
+						emitRM("JEQ", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
+						break;
+					default:
+						emitComment("BUG: Unknown operator");
+						break;
+					} /* case op */
+					if (TraceCode)  emitComment("<- Op");
+				}
 			}
 			break;
 		case assignStmt:
@@ -240,7 +289,36 @@ static void cGen(STNode  tree)
 			cGen(tree->childrenNode[1]);
 			//TODO
 			break;
-		
+		case ifStmt:
+			if (TraceCode) emitComment("-> if");
+			p1 = tree->childrenNode[0];
+			p2 = tree->childrenNode[1];
+			p3 = tree->childrenNode[2];
+			/* generate code for test expression */
+			cGen(p1);
+			savedLoc1 = emitSkip(1);
+			emitComment("if: jump to else belongs here");
+			/* recurse on then part */
+			cGen(p2);
+			savedLoc2 = emitSkip(1);
+			emitComment("if: jump to end belongs here");
+			currentLoc = emitSkip(0);
+			emitBackup(savedLoc1);
+			emitRM_Abs("JEQ", ac, currentLoc, "if: jmp to else");
+			emitRestore();
+			/* recurse on else part */
+			cGen(p3);
+			currentLoc = emitSkip(0);
+			emitBackup(savedLoc2);
+			emitRM_Abs("LDA", pc, currentLoc, "jmp to end");
+			emitRestore();
+			if (TraceCode)  emitComment("<- if");
+			break;
+		case whlieStmt:
+			break;
+		case returnStmt:
+			break;
+
 		default:
 			for (int i = 0; i < MAXNUM; i++)
 				cGen(tree->childrenNode[i]);
