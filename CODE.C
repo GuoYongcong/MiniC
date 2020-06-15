@@ -9,6 +9,7 @@
 #include "globals.h"
 #include "code.h"
 
+
 /* TM location number for current instruction emission */
 static int emitLoc = 0 ;
 

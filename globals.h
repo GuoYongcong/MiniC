@@ -155,6 +155,7 @@ extern YYLTYPE yylloc;
 extern FILE *code;
 extern bool TraceCode;
 //保留字:input和output
-extern const char * input;
-extern const char * output;
+extern const char * func_input;
+extern const char * func_output;
+extern const char * typeString[];
 #endif

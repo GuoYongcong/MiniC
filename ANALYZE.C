@@ -23,8 +23,8 @@ const char * typeString[] = {
 	"function"
 };
 //保留字:input和output
-const char * input = "input";
-const char * output = "output";
+const char * func_input = "input";
+const char * func_output = "output";
 
 
 typedef struct LocationList
@@ -202,7 +202,7 @@ static void insertNode(STNode t)
 		break;
 	case funDeclaration:
 	{
-		if (strcmp(t->attr.ch, input) == 0 || strcmp(t->attr.ch, output) == 0) {
+		if (strcmp(t->attr.ch, func_input) == 0 || strcmp(t->attr.ch, func_output) == 0) {
 			//函数名跟保留字input或output冲突
 			funRedeclarationError(t);
 			break;
@@ -226,7 +226,7 @@ static void insertNode(STNode t)
 	}
 	case funCall:
 	{
-		if (strcmp(t->attr.ch, input) == 0 || strcmp(t->attr.ch, output) == 0) {
+		if (strcmp(t->attr.ch, func_input) == 0 || strcmp(t->attr.ch, func_output) == 0) {
 			//函数名跟保留字input或output相同，使用前无需声明，也不用添加到符号表
 			break;
 		}
@@ -427,13 +427,13 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 		break;
 	case funCall:
 	{
-		if (strcmp(t->attr.ch, input) == 0) {
+		if (strcmp(t->attr.ch, func_input) == 0) {
 			//input函数没有参数
 			if (t->childrenNode[0] != NULL)
 				argumentNumberError("many", &t->location);
 			break;
 		}
-		else if (strcmp(t->attr.ch, output) == 0) {
+		else if (strcmp(t->attr.ch, func_output) == 0) {
 			//output函数有且只有一个参数，且参数类型是int
 			if (NULL == t->childrenNode[0])
 				//参数太少

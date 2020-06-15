@@ -9,7 +9,7 @@
 #ifndef _CODE_H_
 #define _CODE_H_
 
-/* pc = program counter  */
+/* 程序计数器，用于存放下一条指令所在单元的地址的地方  */
 #define  pc 7
 
 /* mp = "memory pointer" points
@@ -23,10 +23,10 @@
  */
 #define gp 5
 
-/* accumulator */
+/*累加器，专门用来存放操作数或运算结果 */
 #define  ac 0
 
-/* 2nd accumulator */
+/* 第二个累加器 */
 #define  ac1 1
 
 /* code emitting utilities */
