@@ -243,9 +243,9 @@ arg_list : arg_list COM expression {$$=addBrotherNode($1, $3);}
 %%
 /**
  * 打印语法错误
- * &@method yyerror
- * &@param  str 错误信息
- * &@return 无返回值
+ * @method yyerror
+ * @param  str 错误信息
+ * @return 无返回值
  */
 void yyerror(const char *str){
     fprintf(stderr,"%s, unexpected token -> \'%s\' at line %d, column %d.\n",
@@ -254,17 +254,17 @@ void yyerror(const char *str){
 
 /**
  * 此函数在每一个输入文件被解析完毕时被调用
- * &@method yywrap
- * &@return 如果返回值为0，允许打开其它的文件继续解析；如果返回值为1，则结束解析文件。
+ * @method yywrap
+ * @return 如果返回值为0，允许打开其它的文件继续解析；如果返回值为1，则结束解析文件。
  */
 int yywrap(){
     return 1;
 }
 /**
  * 程序入口函数
- * &@method main
- * &@param  int   argc   命令行运行此程序时输入的参数个数
- * &@param  char* argv[]    输入的参数数组
+ * @method main
+ * @param  int   argc   命令行运行此程序时输入的参数个数
+ * @param  char* argv[]    输入的参数数组
  * 调用注意事项：参数个数为1时，默认标准输入输出；
  * 参数个数为2时，argv[1]为输入文件，输出为默认；
  * 参数个数为3时，argv[1]为输入文件，argv[2]为输出文件

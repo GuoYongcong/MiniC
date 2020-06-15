@@ -181,7 +181,7 @@ static void cGen(STNode  tree)
 				emitRM("ST", ac, tmpOffset--, mp, "array: push index");
 				emitRM("LDC", ac, list->memloc, 0, "load const");
 				emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-				emitRO("ADD", ac, ac, ac1, "op +");
+				emitRO("ADD", ac, ac, ac1, "array add index");
 				emitRM("LDR", ac, ac, gp, "load id value");
 				if (TraceCode) emitComment("<- Array");
 			}
@@ -212,6 +212,12 @@ static void cGen(STNode  tree)
 					case DIV:
 						emitRO("DIV", ac, ac1, ac, "op /");
 						break;
+					case LESS_OR_EQUAL:
+						emitRO("SUB", ac, ac1, ac, "op <=");
+						emitRM("JLE", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
 					case LESS:
 						emitRO("SUB", ac, ac1, ac, "op <");
 						emitRM("JLT", ac, 2, pc, "br if true");
@@ -226,10 +232,30 @@ static void cGen(STNode  tree)
 						emitRM("LDA", pc, 1, pc, "unconditional jmp");
 						emitRM("LDC", ac, 1, ac, "true case");
 						break;
+					case NOT_EQUAL:
+						emitRO("SUB", ac, ac1, ac, "op !=");
+						emitRM("JNE", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
+						break;
+					case GREA_OR_EQUAL:
+						emitRO("SUB", ac, ac1, ac, "op >=");
+						emitRM("JGE", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
+					case GREA:
+						emitRO("SUB", ac, ac1, ac, "op >");
+						emitRM("JGT", ac, 2, pc, "br if true");
+						emitRM("LDC", ac, 0, ac, "false case");
+						emitRM("LDA", pc, 1, pc, "unconditional jmp");
+						emitRM("LDC", ac, 1, ac, "true case");
+						break;
 					default:
 						emitComment("BUG: Unknown operator");
 						break;
-					} /* case op */
+					}
 					if (TraceCode)  emitComment("<- Op");
 				}
 			}
@@ -258,7 +284,7 @@ static void cGen(STNode  tree)
 				emitRM("ST", ac, tmpOffset--, mp, "array: push index");
 				emitRM("LDC", ac, list->memloc, 0, "load const");
 				emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-				emitRO("ADD", ac, ac, ac1, "op +");
+				emitRO("ADD", ac, ac, ac1, "array add index");
 				emitRM("LD", ac1, ++tmpOffset, mp, "assign: load right");
 				emitRM("STR", ac1, ac, gp, "assign: store value"); //dMem[reg[ac]+reg[gp]] = reg[ac1]
 				emitRM("LDR", ac, ac, gp, "load id value");
@@ -315,6 +341,22 @@ static void cGen(STNode  tree)
 			if (TraceCode)  emitComment("<- if");
 			break;
 		case whlieStmt:
+			if (TraceCode) emitComment("-> whlie");
+			p1 = tree->childrenNode[0];
+			p2 = tree->childrenNode[1];
+			savedLoc1 = emitSkip(0);
+			emitComment("whlie: jump after body comes back here");
+			/* generate code for test */
+			cGen(p1);
+			savedLoc2 = emitSkip(1);
+			emitComment("whlie: jump to end belongs here");
+			/* generate code for body */
+			cGen(p2);
+			emitRM_Abs("LDC", pc, savedLoc1, "whlie: jmp back to test");
+			currentLoc = emitSkip(0);
+			emitBackup(savedLoc2);
+			emitRM_Abs("JEQ", ac, currentLoc, "whlie: jmp to end");
+			if (TraceCode)  emitComment("<- whlie");
 			break;
 		case returnStmt:
 			break;
