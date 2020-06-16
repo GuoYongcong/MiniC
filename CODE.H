@@ -23,6 +23,9 @@
  */
 #define gp 5
 
+/* sp = "stack pointer" 指向函数调用栈的栈顶*/
+#define sp 4
+
 /*累加器，专门用来存放操作数或运算结果 */
 #define  ac 0
 

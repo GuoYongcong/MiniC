@@ -20,6 +20,7 @@
 /******* const *******/
 #define   IADDR_SIZE  1024 /* increase for large programs */
 #define   DADDR_SIZE  1024 /* increase for large programs */
+#define   STDDR_SIZE  1024 /* increase for large programs */
 #define   NO_REGS 8
 #define   PC_REG  7
 
@@ -31,6 +32,7 @@
 typedef enum {
 	opclRR,     /* reg operands r,s,t */
 	opclRM,     /* reg r, mem d+s */
+	opclMM,
 	opclRA      /* reg r, int d+s */
 } OPCLASS;
 
@@ -52,6 +54,12 @@ typedef enum {
 	opSTR,		/* RM     mem(reg(d)+reg(s)) = reg(r) */
 	opRMLim,   /* Limit of RM opcodes */
 
+	opLDM,
+	opLDSR,
+	opSTM,		
+	opSTC,		/* MM		sMem[reg[r]] = d ;reg(s) is ignored*/
+	opMMLim,
+
 	/* RA instructions */
 	opLDA,     /* RA     reg(r) = d+reg(s) */
 	opLDC,     /* RA     reg(r) = d ; reg(s) is ignored */
@@ -69,6 +77,7 @@ typedef enum {
 	srHALT,
 	srIMEM_ERR,
 	srDMEM_ERR,
+	srSMEM_ERR,
 	srZERODIVIDE
 } STEPRESULT;
 
@@ -82,24 +91,28 @@ typedef struct {
 /******** vars ********/
 int iloc = 0;
 int dloc = 0;
+int sloc = 0;
 int traceflag = FALSE;
 int icountflag = FALSE;
 
 INSTRUCTION iMem[IADDR_SIZE];
 int dMem[DADDR_SIZE];
+int sMem[STDDR_SIZE]; //º¯Êýµ÷ÓÃÕ»
 int reg[NO_REGS];
 
 char * opCodeTab[]
 = { "HALT","IN","OUT","ADD","SUB","MUL","DIV","????",
 /* RR opcodes */
 "LD","LDR","ST","STR","????", /* RM opcodes */
+"LDM","LDSR","STM","STC",	/* MM opcodes */
 "LDA","LDC","JLT","JLE","JGT","JGE","JEQ","JNE","????"
 /* RA opcodes */
 };
 
 char * stepResultTab[]
 = { "OK","Halted","Instruction Memory Fault",
-   "Data Memory Fault","Division by 0"
+   "Data Memory Fault","Stack Memory Fault",
+	"Division by 0"
 };
 
 char pgmName[20];
@@ -116,9 +129,14 @@ int done;
 /********************************************/
 int opClass(int c)
 {
-	if (c <= opRRLim) return (opclRR);
-	else if (c <= opRMLim) return (opclRM);
-	else                    return (opclRA);
+	if (c <= opRRLim)
+		return (opclRR);
+	else if (c <= opRMLim)
+		return (opclRM);
+	else if (c <= opMMLim)
+		return opclMM;
+	else
+		return (opclRA);
 } /* opClass */
 
 /********************************************/
@@ -133,6 +151,7 @@ void writeInstruction(int loc)
 		case opclRR: printf("%1d,%1d", iMem[loc].iarg2, iMem[loc].iarg3);
 			break;
 		case opclRM:
+		case opclMM:
 		case opclRA: printf("%3d(%1d)", iMem[loc].iarg2, iMem[loc].iarg3);
 			break;
 		}
@@ -251,6 +270,8 @@ int readInstructions(void)
 	dMem[0] = DADDR_SIZE - 1;
 	for (loc = 1; loc < DADDR_SIZE; loc++)
 		dMem[loc] = 0;
+	for (loc = 0; loc < STDDR_SIZE; loc++)
+		sMem[loc] = 0;
 	for (loc = 0; loc < IADDR_SIZE; loc++)
 	{
 		iMem[loc].iop = opHALT;
@@ -304,6 +325,7 @@ int readInstructions(void)
 				break;
 
 			case opclRM:
+			case opclMM:
 			case opclRA:
 				/***********************************/
 				if ((!getNum()) || (num < 0) || (num >= NO_REGS))
@@ -361,7 +383,16 @@ STEPRESULT stepTM(void)
 		if ((m < 0) || (m > DADDR_SIZE))
 			return srDMEM_ERR;
 		break;
-
+	case opclMM:
+		/***********************************/
+		r = currentinstruction.iarg1;
+		s = currentinstruction.iarg3;
+		m = currentinstruction.iarg2 + reg[s];
+		if ((r < 0) || (r > DADDR_SIZE))
+			return srDMEM_ERR;
+		if ((m < 0) || (m > STDDR_SIZE))
+			return srSMEM_ERR;
+		break;
 	case opclRA:
 		/***********************************/
 		r = currentinstruction.iarg1;
@@ -413,10 +444,27 @@ STEPRESULT stepTM(void)
 		m = m - currentinstruction.iarg2 + reg[currentinstruction.iarg2];
 		reg[r] = dMem[m];  break;
 	case opST:    dMem[m] = reg[r];  break;
-	case opSTR:    
+	case opSTR:
 		m = m - currentinstruction.iarg2 + reg[currentinstruction.iarg2];
 		dMem[m] = reg[r];  break;
-
+		/*************** MM instructions ********************/
+	case opLDM: {
+		for (int i = 0; i < currentinstruction.iarg2; i++) {
+			sMem[reg[s] + i] = dMem[r + i];
+		}
+		break;
+	}
+	case opLDSR: reg[r] = sMem[reg[s]]; break;
+	case opSTM: {
+		int end = sMem[--reg[s]];
+		int total = sMem[--reg[s]];
+		for (int i = end; i > end-total; i--) {
+			dMem[i] = sMem[--reg[s]];
+			sMem[reg[s]] = 0;
+		}
+		break;
+	}
+	case opSTC:	sMem[reg[r]] = currentinstruction.iarg2; break;
 		/*************** RA instructions ********************/
 	case opLDA:    reg[r] = m; break;
 	case opLDC:    reg[r] = currentinstruction.iarg2;   break;
@@ -565,6 +613,8 @@ int doCommand(void)
 		dMem[0] = DADDR_SIZE - 1;
 		for (loc = 1; loc < DADDR_SIZE; loc++)
 			dMem[loc] = 0;
+		for (loc = 0; loc < STDDR_SIZE; loc++)
+			sMem[loc] = 0;
 		break;
 
 	case 'q': return FALSE;  /* break; */

@@ -19,6 +19,9 @@
 */
 static int tmpOffset = 0;
 
+//当前函数在符号表中的位置指针
+static BucketList curFuncion = NULL;
+
 static void genStmt(STNode tree);
 
 /* prototype for internal recursive code generator */
@@ -293,6 +296,7 @@ static void cGen(STNode  tree)
 			emitComment("<- assign");
 			break;
 		case funCall:
+		{
 			if (strcmp(tree->attr.ch, func_input) == 0) {
 				//input函数
 				emitRO("IN", ac, 0, 0, "input integer value");
@@ -303,14 +307,40 @@ static void cGen(STNode  tree)
 				emitRO("OUT", ac, 0, 0, "output ac");
 			}
 			else {
-				//TODO
-				;
+				//保存相应局部变量的值
+				if (curFuncion != NULL) {
+					int i = 0,
+						start = curFuncion->memloc + 2,
+						total = curFuncion->last_memloc - start + 1;
+					currentLoc = emitSkip(0);
+					emitRM("STC", sp, currentLoc, 0, "save current location");
+					emitRM("LDA", sp, 1, sp, "move stack pointer");
+					emitRM("LDM", start, total, sp, "save local variables");
+					emitRM("LDA", sp, total, sp, "move stack pointer");
+					emitRM("STC", sp, total, 0, "save number of local variables");
+					emitRM("LDA", sp, 1, sp, "move stack pointer");
+					emitRM("STC", sp, curFuncion->last_memloc, 0, "save last memloc");
+					emitRM("LDA", sp, 1, sp, "move stack pointer");
+				}
+				//跳转到被调用的函数的入口
+				list = st_lookup(tree->attr.ch, &tree->location);
+				emitRM("LD", pc, list->memloc, gp, "load entry to a function");
 			}
 			break;
+		}
 		case funDeclaration:
-			if (TraceCode) fprintf(code, "* ---Function %s start---\n", tree->attr.ch);
+		{
+			bool isMain = (strcmp(tree->attr.ch, "main") == 0);
+			if (!isMain)
+			{
+				//如果不是main函数则跳过
+				savedLoc1 = emitSkip(2);
+				emitComment("Jump to end of function belongs here");
+			}
+			if (TraceCode) fprintf(code, "* --- Function %s ---\n", tree->attr.ch);
 			//存储函数入口
 			list = st_lookup(tree->attr.ch, &tree->location);
+			curFuncion = list;
 			currentLoc = emitSkip(0);
 			emitRM("LDC", ac, currentLoc, 0, "load const");
 			emitRM("ST", ac, list->memloc, gp, "store value");
@@ -318,11 +348,27 @@ static void cGen(STNode  tree)
 			emitRM("LDC", ac, list->last_memloc, 0, "load const");
 			emitRM("ST", ac, list->memloc + 1, gp, "store value");
 			cGen(tree->childrenNode[2]);
-			if (TraceCode) fprintf(code, "* ---Function %s end---\n", tree->attr.ch);
-			if (strcmp(tree->attr.ch, "main") == 0)
+			if (TraceCode) fprintf(code, "* --- End of Function %s ---\n", tree->attr.ch);
+			if (isMain)
 				//如果是main函数，则程序结束
 				emitRO("HALT", 0, 0, 0, "");
+			else {
+				//如果不是main函数，则回到调用该函数的地方
+				emitRM("STM", 0, 0, sp, "recover local variables");
+				emitRM("LDSR", pc, 0, sp, "back to function call");
+				emitRM("LDA", sp, -1, sp, "move stack pointer");
+			}
+			if (!isMain)
+			{
+				//如果不是main函数则跳过
+				currentLoc = emitSkip(0);
+				emitBackup(savedLoc1);
+				emitRM("LDC", ac, 1, 0, "load const");
+				emitRM_Abs("JEQ", ac, currentLoc, "Jump to end of function");
+				emitRestore();
+			}
 			break;
+		}
 		case compoundStmt:
 			cGen(tree->childrenNode[1]);
 			//TODO
@@ -373,9 +419,16 @@ static void cGen(STNode  tree)
 			break;
 
 		case returnStmt:
+			emitComment("->return");
 			cGen(tree->childrenNode[0]);
+			emitComment("<-return");
+			if (strcmp(curFuncion->name, "main") == 0) {
+				//如果不是main函数，则回到调用该函数的地方
+				emitRM("STM", 0, 0, sp, "recover local variables");
+				emitRM("LDSR", pc, 0, sp, "back to function call");
+				emitRM("LDA", sp, -1, sp, "move stack pointer");
+			}
 			break;
-
 		default:
 			for (int i = 0; i < MAXNUM; i++)
 				cGen(tree->childrenNode[i]);
