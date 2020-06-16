@@ -33,7 +33,7 @@ static void genStmt(STNode  tree)
 	switch (tree->nodeType) {
 
 		//case IfK:
-		//	if (TraceCode) emitComment("-> if");
+		//	 emitComment("-> if");
 		//	p1 = tree->child[0];
 		//	p2 = tree->child[1];
 		//	p3 = tree->child[2];
@@ -55,11 +55,11 @@ static void genStmt(STNode  tree)
 		//	emitBackup(savedLoc2);
 		//	emitRM_Abs("LDA", pc, currentLoc, "jmp to end");
 		//	emitRestore();
-		//	if (TraceCode)  emitComment("<- if");
+		//	  emitComment("<- if");
 		//	break; /* if_k */
 
 		//case RepeatK:
-		//	if (TraceCode) emitComment("-> repeat");
+		//	 emitComment("-> repeat");
 		//	p1 = tree->child[0];
 		//	p2 = tree->child[1];
 		//	savedLoc1 = emitSkip(0);
@@ -69,7 +69,7 @@ static void genStmt(STNode  tree)
 		//	/* generate code for test */
 		//	cGen(p2);
 		//	emitRM_Abs("JEQ", ac, savedLoc1, "repeat: jmp back to body");
-		//	if (TraceCode)  emitComment("<- repeat");
+		//	  emitComment("<- repeat");
 		//	break; /* repeat */
 
 
@@ -99,7 +99,7 @@ static void genExp(STNode  tree)
 
 
 		//case OpK:
-		//	if (TraceCode) emitComment("-> Op");
+		//	 emitComment("-> Op");
 		//	p1 = tree->child[0];
 		//	p2 = tree->child[1];
 		//	/* gen code for ac = left arg */
@@ -141,7 +141,7 @@ static void genExp(STNode  tree)
 		//		emitComment("BUG: Unknown operator");
 		//		break;
 		//	} /* case op */
-		//	if (TraceCode)  emitComment("<- Op");
+		//	  emitComment("<- Op");
 		//	break; /* OpK */
 
 	default:
@@ -161,36 +161,36 @@ static void cGen(STNode  tree)
 		BucketList list;
 		switch (tree->nodeType) {
 		case constType:
-			if (TraceCode) emitComment("-> Const");
+			emitComment("-> Const");
 			/* gen code to load integer constant using LDC */
 			emitRM("LDC", ac, tree->attr.value, 0, "load const");
-			if (TraceCode)  emitComment("<- Const");
+			emitComment("<- Const");
 			break;
 		case varType:
 			list = st_lookup(tree->attr.ch, &tree->location);
 			if (strcmp(list->type, typeString[Integer]) == 0) {
 				//int类型变量
-				if (TraceCode) emitComment("-> Id");
+				emitComment("-> Id");
 				emitRM("LD", ac, list->memloc, gp, "load id value");
-				if (TraceCode)  emitComment("<- Id");
+				emitComment("<- Id");
 			}
 			else {
 				//数组
-				if (TraceCode) emitComment("-> Array");
+				emitComment("-> Array");
 				cGen(tree->childrenNode[0]);
 				emitRM("ST", ac, tmpOffset--, mp, "array: push index");
 				emitRM("LDC", ac, list->memloc, 0, "load const");
 				emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
 				emitRO("ADD", ac, ac, ac1, "array add index");
 				emitRM("LDR", ac, ac, gp, "load id value");
-				if (TraceCode) emitComment("<- Array");
+				emitComment("<- Array");
 			}
 			break;
 		case defaultType:
 			if (tree->brotherNode[0] != NULL && tree->brotherNode[1] != NULL) {
 				if (opType == tree->brotherNode[0]->nodeType) {
 					//简单表达式
-					if (TraceCode) emitComment("-> Op");
+					emitComment("-> Op");
 					p1 = tree->brotherNode[1]->childrenNode[0];
 					p2 = tree->brotherNode[1]->childrenNode[1];
 					//左操作数
@@ -256,12 +256,12 @@ static void cGen(STNode  tree)
 						emitComment("BUG: Unknown operator");
 						break;
 					}
-					if (TraceCode)  emitComment("<- Op");
+					emitComment("<- Op");
 				}
 			}
 			break;
 		case assignStmt:
-			if (TraceCode) emitComment("-> assign");
+			emitComment("-> assign");
 			/* generate code for rhs */
 			cGen(tree->childrenNode[1]);
 			/* now store value */
@@ -270,14 +270,14 @@ static void cGen(STNode  tree)
 				&tree->childrenNode[0]->location);
 			if (strcmp(list->type, typeString[Integer]) == 0) {
 				//int类型变量
-				if (TraceCode) emitComment("-> Id");
+				emitComment("-> Id");
 				emitRM("ST", ac, list->memloc, gp, "assign: store value");
-				if (TraceCode)  emitComment("<- Id");
+				emitComment("<- Id");
 			}
 			else {
 				//数组
 				emitRM("ST", ac, tmpOffset--, mp, "assign: push right");
-				if (TraceCode) emitComment("-> Array");
+				emitComment("-> Array");
 				//数组下标
 				cGen(tree->childrenNode[0]->childrenNode[0]);
 
@@ -288,9 +288,9 @@ static void cGen(STNode  tree)
 				emitRM("LD", ac1, ++tmpOffset, mp, "assign: load right");
 				emitRM("STR", ac1, ac, gp, "assign: store value"); //dMem[reg[ac]+reg[gp]] = reg[ac1]
 				emitRM("LDR", ac, ac, gp, "load id value");
-				if (TraceCode) emitComment("<- Array");
+				emitComment("<- Array");
 			}
-			if (TraceCode)  emitComment("<- assign");
+			emitComment("<- assign");
 			break;
 		case funCall:
 			if (strcmp(tree->attr.ch, func_input) == 0) {
@@ -308,15 +308,27 @@ static void cGen(STNode  tree)
 			}
 			break;
 		case funDeclaration:
+			if (TraceCode) fprintf(code, "* ---Function %s start---\n", tree->attr.ch);
+			//存储函数入口
+			list = st_lookup(tree->attr.ch, &tree->location);
+			currentLoc = emitSkip(0);
+			emitRM("LDC", ac, currentLoc, 0, "load const");
+			emitRM("ST", ac, list->memloc, gp, "store value");
+			//存储last_memloc
+			emitRM("LDC", ac, list->last_memloc, 0, "load const");
+			emitRM("ST", ac, list->memloc + 1, gp, "store value");
 			cGen(tree->childrenNode[2]);
-			//TODO
+			if (TraceCode) fprintf(code, "* ---Function %s end---\n", tree->attr.ch);
+			if (strcmp(tree->attr.ch, "main") == 0)
+				//如果是main函数，则程序结束
+				emitRO("HALT", 0, 0, 0, "");
 			break;
 		case compoundStmt:
 			cGen(tree->childrenNode[1]);
 			//TODO
 			break;
 		case ifStmt:
-			if (TraceCode) emitComment("-> if");
+			emitComment("-> if");
 			p1 = tree->childrenNode[0];
 			p2 = tree->childrenNode[1];
 			p3 = tree->childrenNode[2];
@@ -338,10 +350,10 @@ static void cGen(STNode  tree)
 			emitBackup(savedLoc2);
 			emitRM_Abs("LDA", pc, currentLoc, "jmp to end");
 			emitRestore();
-			if (TraceCode)  emitComment("<- if");
+			emitComment("<- if");
 			break;
 		case whileStmt:
-			if (TraceCode) emitComment("-> while");
+			emitComment("-> while");
 			p1 = tree->childrenNode[0];
 			p2 = tree->childrenNode[1];
 			savedLoc1 = emitSkip(0);
@@ -357,7 +369,7 @@ static void cGen(STNode  tree)
 			emitBackup(savedLoc2);
 			emitRM_Abs("JEQ", ac, currentLoc, "while: jmp to end");
 			emitRestore();
-			if (TraceCode)  emitComment("<- while");
+			emitComment("<- while");
 			break;
 
 		case returnStmt:
