@@ -100,7 +100,7 @@ int dMem[DADDR_SIZE];
 int sMem[STDDR_SIZE]; //º¯Êýµ÷ÓÃÕ»
 int reg[NO_REGS];
 
-char * opCodeTab[]
+const char * opCodeTab[]
 = { "HALT","IN","OUT","ADD","SUB","MUL","DIV","????",
 /* RR opcodes */
 "LD","LDR","ST","STR","????", /* RM opcodes */
@@ -109,7 +109,7 @@ char * opCodeTab[]
 /* RA opcodes */
 };
 
-char * stepResultTab[]
+const char * stepResultTab[]
 = { "OK","Halted","Instruction Memory Fault",
    "Data Memory Fault","Stack Memory Fault",
 	"Division by 0"
@@ -251,7 +251,7 @@ int atEOL(void)
 } /* atEOL */
 
 /********************************************/
-int error(char * msg, int lineNo, int instNo)
+int error(const char * msg, int lineNo, int instNo)
 {
 	printf("Line %d", lineNo);
 	if (instNo >= 0) printf(" (Instruction %d)", instNo);
@@ -325,10 +325,25 @@ int readInstructions(void)
 				break;
 
 			case opclRM:
-			case opclMM:
 			case opclRA:
 				/***********************************/
 				if ((!getNum()) || (num < 0) || (num >= NO_REGS))
+					return error("Bad first register", lineNo, loc);
+				arg1 = num;
+				if (!skipCh(','))
+					return error("Missing comma", lineNo, loc);
+				if (!getNum())
+					return error("Bad displacement", lineNo, loc);
+				arg2 = num;
+				if (!skipCh('(') && !skipCh(','))
+					return error("Missing LParen", lineNo, loc);
+				if ((!getNum()) || (num < 0) || (num >= NO_REGS))
+					return error("Bad second register", lineNo, loc);
+				arg3 = num;
+				break;
+			case opclMM:
+				/***********************************/
+				if (!getNum())
 					return error("Bad first register", lineNo, loc);
 				arg1 = num;
 				if (!skipCh(','))

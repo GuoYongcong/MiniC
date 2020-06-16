@@ -297,6 +297,7 @@ static void cGen(STNode  tree)
 			break;
 		case funCall:
 		{
+			emitComment("->function call");
 			if (strcmp(tree->attr.ch, func_input) == 0) {
 				//input函数
 				emitRO("IN", ac, 0, 0, "input integer value");
@@ -326,27 +327,31 @@ static void cGen(STNode  tree)
 				list = st_lookup(tree->attr.ch, &tree->location);
 				emitRM("LD", pc, list->memloc, gp, "load entry to a function");
 			}
+			emitComment("<-function call");
 			break;
 		}
 		case funDeclaration:
 		{
 			bool isMain = (strcmp(tree->attr.ch, "main") == 0);
+			if (TraceCode) fprintf(code, "* --- Function %s ---\n", tree->attr.ch);
+			if (!isMain)
+			{
+				//存储函数入口
+				list = st_lookup(tree->attr.ch, &tree->location);
+				curFuncion = list;
+				currentLoc = emitSkip(0);
+				emitRM("LDC", ac, currentLoc + 6, 0, "load const");
+				emitRM("ST", ac, list->memloc, gp, "store value");
+				//存储last_memloc
+				emitRM("LDC", ac, list->last_memloc, 0, "load const");
+				emitRM("ST", ac, list->memloc + 1, gp, "store value");
+			}
 			if (!isMain)
 			{
 				//如果不是main函数则跳过
 				savedLoc1 = emitSkip(2);
 				emitComment("Jump to end of function belongs here");
 			}
-			if (TraceCode) fprintf(code, "* --- Function %s ---\n", tree->attr.ch);
-			//存储函数入口
-			list = st_lookup(tree->attr.ch, &tree->location);
-			curFuncion = list;
-			currentLoc = emitSkip(0);
-			emitRM("LDC", ac, currentLoc, 0, "load const");
-			emitRM("ST", ac, list->memloc, gp, "store value");
-			//存储last_memloc
-			emitRM("LDC", ac, list->last_memloc, 0, "load const");
-			emitRM("ST", ac, list->memloc + 1, gp, "store value");
 			cGen(tree->childrenNode[2]);
 			if (TraceCode) fprintf(code, "* --- End of Function %s ---\n", tree->attr.ch);
 			if (isMain)
@@ -422,7 +427,7 @@ static void cGen(STNode  tree)
 			emitComment("->return");
 			cGen(tree->childrenNode[0]);
 			emitComment("<-return");
-			if (strcmp(curFuncion->name, "main") == 0) {
+			if (strcmp(curFuncion->name, "main") != 0) {
 				//如果不是main函数，则回到调用该函数的地方
 				emitRM("STM", 0, 0, sp, "recover local variables");
 				emitRM("LDSR", pc, 0, sp, "back to function call");
