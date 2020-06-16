@@ -8,7 +8,7 @@
 * @History:
 *   <author>    <version>   <date>          <description>
 *   郭永聪         1.0.1     2020-06-01       结构体Node添加了两个个属性：brotherNode[MAXBRONUM]和lineno
-*
+*	郭永聪		  1.1.0		2020-06-16		 结构体BucketListRec添加属性last_memloc
 */
 #ifndef _GLOBALS_H_
 #define _GLOBALS_H_
@@ -140,9 +140,8 @@ typedef struct BucketListRec
     Loc scope; //作用域
     LineList lines;
     int memloc; /* memory location for variable */
+	int last_memloc; //函数内部的局部变量的最后一个位置
     struct BucketListRec *next;
-    // struct BucketListRec *outer; //外部作用域
-    // struct BucketListRec *inner; //内部作用域
 } * BucketList;
 
 //行号

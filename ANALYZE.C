@@ -26,7 +26,6 @@ const char * typeString[] = {
 const char * func_input = "input";
 const char * func_output = "output";
 
-
 typedef struct LocationList
 {
 	Loc loc; //位置信息
@@ -215,9 +214,14 @@ static void insertNode(STNode t)
 			insertBucketList(t->attr.ch,
 				typeString[Function],
 				t->location.first_line,
-				location++,
+				location,
 				0,
 				t);
+			/*函数占两个位置:
+			一个存储函数入口；
+			一个存储函数内部的局部变量的最后一个位置；
+			*/
+			location += 2;
 		}
 		else
 			// 已存在符号表中，重复声明函数
@@ -248,6 +252,13 @@ static void insertNode(STNode t)
 	}
 	case varDeclaration:
 	{
+		if (strcmp(t->childrenNode[1]->attr.ch, func_input) == 0 
+			|| strcmp(t->childrenNode[1]->attr.ch, func_output) == 0) 
+		{
+			//变量名跟保留字input或output冲突
+			varRedeclarationError(t);
+			break;
+		}
 		if (strcmp(t->childrenNode[0]->attr.ch, typeString[Integer]) != 0)
 		{
 			invalidDeclarationError(t);

@@ -26,6 +26,9 @@
    /* the hash table */
 static BucketList hashTable[SIZE];
 
+//当前函数在符号表中的位置指针
+static BucketList curFuncion = NULL;
+
 /* the hash function */
 static int hash(char *key)
 {
@@ -50,17 +53,30 @@ void insertBucketList(char *name, char *type, int lineno, int loc, int len, STNo
 	l->lines->lineno = lineno;
 	l->lines->next = NULL;
 	l->memloc = loc;
+	l->last_memloc = loc;
+	if(curFuncion!=NULL&&compareScope(&curFuncion->scope, &l->scope)==1)
+		curFuncion->last_memloc = l->memloc;
+	else
+		curFuncion = NULL;
 	l->next = hashTable[h];
 	hashTable[h] = l;
 	if (strcmp(type, "array") == 0)
-		l->attr.length = len;
-	if (strcmp(type, "function") == 0)
 	{
-		Loc scope = { t->location.first_line,
-					 t->location.first_column,
+		l->attr.length = len;
+		if (curFuncion != NULL&&compareScope(&curFuncion->scope, &l->scope) == 1)
+			curFuncion->last_memloc = l->memloc + len - 1;
+		else
+			curFuncion = NULL;
+	}
+	else if (strcmp(type, "function") == 0)
+	{
+		curFuncion = l;
+		Loc scope = { t->location.last_line,
+					 t->location.last_column,
 					 t->childrenNode[2]->location.last_line,
 					 t->childrenNode[2]->location.last_column };
 		push(&scope);
+		copyLocation(&t->childrenNode[2]->location, &scope);
 		if (strcmp(t->childrenNode[0]->attr.ch, "int") == 0)
 			l->attr.info.returnType = Integer;
 		else
@@ -151,6 +167,8 @@ void printSymTab(FILE *listing)
 					l->scope.last_line,
 					l->scope.last_column);
 				fprintf(listing, "%-8d  ", l->memloc);
+				fprintf(listing, "last_memloc:%d  ", l->last_memloc);
+
 				while (t != NULL)
 				{
 					fprintf(listing, "%-4d ", t->lineno);
