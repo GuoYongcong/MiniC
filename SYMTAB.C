@@ -54,7 +54,7 @@ void insertBucketList(char *name, char *type, int lineno, int loc, int len, STNo
 	l->lines->next = NULL;
 	l->memloc = loc;
 	l->last_memloc = loc;
-	if(curFuncion!=NULL&&compareScope(&curFuncion->scope, &l->scope)==1)
+	if (curFuncion != NULL&&compareScope(&curFuncion->scope, &l->scope) == 1)
 		curFuncion->last_memloc = l->memloc;
 	else
 		curFuncion = NULL;
@@ -137,8 +137,14 @@ BucketList st_lookup(char *name, Loc *loc)
 {
 	int h = hash(name);
 	BucketList l = hashTable[h];
-	while ((l != NULL) && (strcmp(name, l->name) != 0) && compareScope(&l->scope, loc) != 1)
+	while (l != NULL) {
+		if (strcmp(name, l->name) == 0) {
+			int res = compareScope(&l->scope, loc);
+			if (1 == res || 0 == res)
+				return l;
+		}
 		l = l->next;
+	}
 	return l;
 }
 
@@ -167,7 +173,7 @@ void printSymTab(FILE *listing)
 					l->scope.last_line,
 					l->scope.last_column);
 				fprintf(listing, "%-8d  ", l->memloc);
-				fprintf(listing, "last_memloc:%d  ", l->last_memloc);
+				//fprintf(listing, "last_memloc:%d  ", l->last_memloc);
 
 				while (t != NULL)
 				{

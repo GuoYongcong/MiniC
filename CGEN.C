@@ -54,135 +54,29 @@ void freeNodeList(NodeList list) {
 		free(l);
 	}
 }
-static void genStmt(STNode tree);
+//判断数组是否为函数形参
+static bool isFuncParam(BucketList list) {
+	PL params = curFuncion->attr.info.params;
+	int total = 0;
+	while (params != NULL)
+	{
+		total++;
+		params = params->next;
+	}
+	int start = curFuncion->memloc + 2;
+	return (list->memloc >= start) && (list->memloc <= start + total - 1);
+}
+//gen关系操作符
+static void genRelop(const char * code, const char * op){
+	emitRO("SUB", ac, ac1, ac, op);
+	emitRM(code, ac, 2, pc, "br if true");
+	emitRM("LDC", ac, 0, ac, "false case");
+	emitRM("LDA", pc, 1, pc, "unconditional jmp");
+	emitRM("LDC", ac, 1, ac, "true case");
+}
 
 /* prototype for internal recursive code generator */
 static void cGen(STNode  tree);
-
-/* Procedure genStmt generates code at a statement node */
-static void genStmt(STNode  tree)
-{
-	STNode  p1, p2, p3;
-	int savedLoc1, savedLoc2, currentLoc;
-	BucketList list;
-	switch (tree->nodeType) {
-
-		//case IfK:
-		//	 emitComment("-> if");
-		//	p1 = tree->child[0];
-		//	p2 = tree->child[1];
-		//	p3 = tree->child[2];
-		//	/* generate code for test expression */
-		//	cGen(p1);
-		//	savedLoc1 = emitSkip(1);
-		//	emitComment("if: jump to else belongs here");
-		//	/* recurse on then part */
-		//	cGen(p2);
-		//	savedLoc2 = emitSkip(1);
-		//	emitComment("if: jump to end belongs here");
-		//	currentLoc = emitSkip(0);
-		//	emitBackup(savedLoc1);
-		//	emitRM_Abs("JEQ", ac, currentLoc, "if: jmp to else");
-		//	emitRestore();
-		//	/* recurse on else part */
-		//	cGen(p3);
-		//	currentLoc = emitSkip(0);
-		//	emitBackup(savedLoc2);
-		//	emitRM_Abs("LDA", pc, currentLoc, "jmp to end");
-		//	emitRestore();
-		//	  emitComment("<- if");
-		//	break; /* if_k */
-
-		//case RepeatK:
-		//	 emitComment("-> repeat");
-		//	p1 = tree->child[0];
-		//	p2 = tree->child[1];
-		//	savedLoc1 = emitSkip(0);
-		//	emitComment("repeat: jump after body comes back here");
-		//	/* generate code for body */
-		//	cGen(p1);
-		//	/* generate code for test */
-		//	cGen(p2);
-		//	emitRM_Abs("JEQ", ac, savedLoc1, "repeat: jmp back to body");
-		//	  emitComment("<- repeat");
-		//	break; /* repeat */
-
-
-		//case ReadK:
-		//	emitRO("IN", ac, 0, 0, "read integer value");
-		//	list = st_lookup(tree->attr.name);
-		//	emitRM("ST", ac, list, gp, "read: store value");
-		//	break;
-		//case WriteK:
-		//	/* generate code for expression to write */
-		//	cGen(tree->child[0]);
-		//	/* now output it */
-		//	emitRO("OUT", ac, 0, 0, "write ac");
-		//	break;
-	default:
-		break;
-	}
-} /* genStmt */
-
-/* Procedure genExp generates code at an expression node */
-static void genExp(STNode  tree)
-{
-	BucketList list;
-	STNode  p1, p2;
-	switch (tree->nodeType) {
-
-
-
-		//case OpK:
-		//	 emitComment("-> Op");
-		//	p1 = tree->child[0];
-		//	p2 = tree->child[1];
-		//	/* gen code for ac = left arg */
-		//	cGen(p1);
-		//	/* gen code to push left operand */
-		//	emitRM("ST", ac, tmpOffset--, mp, "op: push left");
-		//	/* gen code for ac = right operand */
-		//	cGen(p2);
-		//	/* now load left operand */
-		//	emitRM("LD", ac1, ++tmpOffset, mp, "op: load left");
-		//	switch (tree->attr.op) {
-		//	case PLUS:
-		//		emitRO("ADD", ac, ac1, ac, "op +");
-		//		break;
-		//	case MINUS:
-		//		emitRO("SUB", ac, ac1, ac, "op -");
-		//		break;
-		//	case TIMES:
-		//		emitRO("MUL", ac, ac1, ac, "op *");
-		//		break;
-		//	case OVER:
-		//		emitRO("DIV", ac, ac1, ac, "op /");
-		//		break;
-		//	case LT:
-		//		emitRO("SUB", ac, ac1, ac, "op <");
-		//		emitRM("JLT", ac, 2, pc, "br if true");
-		//		emitRM("LDC", ac, 0, ac, "false case");
-		//		emitRM("LDA", pc, 1, pc, "unconditional jmp");
-		//		emitRM("LDC", ac, 1, ac, "true case");
-		//		break;
-		//	case EQ:
-		//		emitRO("SUB", ac, ac1, ac, "op ==");
-		//		emitRM("JEQ", ac, 2, pc, "br if true");
-		//		emitRM("LDC", ac, 0, ac, "false case");
-		//		emitRM("LDA", pc, 1, pc, "unconditional jmp");
-		//		emitRM("LDC", ac, 1, ac, "true case");
-		//		break;
-		//	default:
-		//		emitComment("BUG: Unknown operator");
-		//		break;
-		//	} /* case op */
-		//	  emitComment("<- Op");
-		//	break; /* OpK */
-
-	default:
-		break;
-	}
-} /* genExp */
 
 /* Procedure cGen recursively generates code by
  * tree traversal
@@ -212,16 +106,7 @@ static void cGen(STNode  tree)
 			else {
 				//数组
 				emitComment("-> Array");
-				//判断该数组是否为函数形参
-				PL params = curFuncion->attr.info.params;
-				int total = 0;
-				while (params != NULL)
-				{
-					total++;
-					params = params->next;
-				}
-				int start = curFuncion->memloc + 2;
-				if ((list->memloc >= start) && (list->memloc <= start + total - 1))
+				if (isFuncParam(list))
 				{
 					//该数组是函数形参
 					if (tree->childrenNode[0] != NULL)
@@ -290,44 +175,22 @@ static void cGen(STNode  tree)
 						emitRO("DIV", ac, ac1, ac, "op /");
 						break;
 					case LESS_OR_EQUAL:
-						emitRO("SUB", ac, ac1, ac, "op <=");
-						emitRM("JLE", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JLE", "op <=");
+						break;
 					case LESS:
-						emitRO("SUB", ac, ac1, ac, "op <");
-						emitRM("JLT", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JLT", "op <");
 						break;
 					case EQUAL:
-						emitRO("SUB", ac, ac1, ac, "op ==");
-						emitRM("JEQ", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JEQ", "op ==");
 						break;
 					case NOT_EQUAL:
-						emitRO("SUB", ac, ac1, ac, "op !=");
-						emitRM("JNE", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JNE", "op !=");
 						break;
 					case GREA_OR_EQUAL:
-						emitRO("SUB", ac, ac1, ac, "op >=");
-						emitRM("JGE", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JGE", "op >=");
+						break;
 					case GREA:
-						emitRO("SUB", ac, ac1, ac, "op >");
-						emitRM("JGT", ac, 2, pc, "br if true");
-						emitRM("LDC", ac, 0, ac, "false case");
-						emitRM("LDA", pc, 1, pc, "unconditional jmp");
-						emitRM("LDC", ac, 1, ac, "true case");
+						genRelop("JGT", "op >");
 						break;
 					default:
 						emitComment("BUG: Unknown operator");
@@ -345,6 +208,7 @@ static void cGen(STNode  tree)
 			list = st_lookup(
 				tree->childrenNode[0]->attr.ch,
 				&tree->childrenNode[0]->location);
+
 			if (strcmp(list->type, typeString[Integer]) == 0) {
 				//int类型变量
 				emitComment("-> Id");
@@ -352,18 +216,26 @@ static void cGen(STNode  tree)
 				emitComment("<- Id");
 			}
 			else {
-				//数组
-				emitRM("ST", ac, tmpOffset--, mp, "assign: push right");
 				emitComment("-> Array");
+				emitRM("ST", ac, tmpOffset--, mp, "assign: push right");
 				//数组下标
 				cGen(tree->childrenNode[0]->childrenNode[0]);
-
 				emitRM("ST", ac, tmpOffset--, mp, "array: push index");
-				emitRM("LDC", ac, list->memloc, 0, "load const");
+				if (isFuncParam(list))
+				{
+					//该数组是函数形参
+					emitRM("LDC", ac, list->memloc, 0, "array: load param address");
+					emitRM("LD", ac, 0, ac, "array: load actual address");
+				}
+				else
+				{
+					//该数组不是函数形参
+					emitRM("LDC", ac, list->memloc, 0, "array: load address");
+				}
 				emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-				emitRO("ADD", ac, ac, ac1, "array add index");
+				emitRO("ADD", ac, ac, ac1, "array: address add index");
 				emitRM("LD", ac1, ++tmpOffset, mp, "assign: load right");
-				emitRM("STR", ac1, ac, gp, "assign: store value"); //dMem[reg[ac]+reg[gp]] = reg[ac1]
+				emitRM("STR", ac1, ac, gp, "assign: store value");
 				emitRM("LDR", ac, ac, gp, "load id value");
 				emitComment("<- Array");
 			}
