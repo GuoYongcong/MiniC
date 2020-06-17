@@ -132,7 +132,7 @@ typedef struct FunctionInformation
 typedef struct BucketListRec
 {
     char *name; //变量名
-    char *type; //变量类型
+    Type type; //变量类型
     union {
         int length;    //数组的长度
         FuncInfo info; //函数信息

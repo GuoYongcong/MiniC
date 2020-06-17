@@ -147,18 +147,18 @@ static void voidValueError(STNode t)
 	Error = true;
 }
 //from s1 to s2
-static void invalidConversionError(const char *s1, const char *s2, Loc *loc)
+static void invalidConversionError(Type t1, Type t2, Loc *loc)
 {
 	fprintf(stderr, "error: invalid conversion from \'%s\' to \'%s\',  at line %d, column %d.\n",
-		s1, s2, loc->first_line, loc->first_column);
+		typeString[t1], typeString[t2], loc->first_line, loc->first_column);
 	Error = true;
 }
 
 //error: assignment of function
-static void assignmentError(const char * type, Loc *loc)
+static void assignmentError(Type type, Loc *loc)
 {
 	fprintf(stderr, "error: cannot assign to \'%s\',  at line %d, column %d.\n",
-		type, loc->first_line, loc->first_column);
+		typeString[type], loc->first_line, loc->first_column);
 	Error = true;
 }
 static void invalidAssignmentError(const char * type, Loc *loc)
@@ -168,10 +168,10 @@ static void invalidAssignmentError(const char * type, Loc *loc)
 	Error = true;
 }
 
-static void invalidOperandError(char *type, Loc *loc)
+static void invalidOperandError(Type type, Loc *loc)
 {
 	fprintf(stderr, "error: invalid operand of type \'%s\' to operator,  at line %d, column %d.\n",
-		type, loc->first_line, loc->first_column);
+		typeString[type], loc->first_line, loc->first_column);
 	Error = true;
 }
 
@@ -212,7 +212,7 @@ static void insertNode(STNode t)
 			while (1 != compareScope(getTop(), &t->location))
 				pop();
 			insertBucketList(t->attr.ch,
-				typeString[Function],
+				Function,
 				t->location.first_line,
 				location,
 				0,
@@ -242,18 +242,15 @@ static void insertNode(STNode t)
 		{
 			// 已存在符号表中
 			insertLineList(l, t->location.first_line);
-			if (strcmp(l->type, typeString[Integer]) == 0)
-				t->dataType = Integer;
-			else if (strcmp(l->type, typeString[Void]) == 0)
-				t->dataType = Void;
+			t->dataType = l->type;
 
 		}
 		break;
 	}
 	case varDeclaration:
 	{
-		if (strcmp(t->childrenNode[1]->attr.ch, func_input) == 0 
-			|| strcmp(t->childrenNode[1]->attr.ch, func_output) == 0) 
+		if (strcmp(t->childrenNode[1]->attr.ch, func_input) == 0
+			|| strcmp(t->childrenNode[1]->attr.ch, func_output) == 0)
 		{
 			//变量名跟保留字input或output冲突
 			varRedeclarationError(t);
@@ -279,7 +276,7 @@ static void insertNode(STNode t)
 				if (constType == stn->childrenNode[0]->nodeType)
 					length = stn->childrenNode[0]->attr.value;
 				insertBucketList(stn->attr.ch,
-					typeString[Array],
+					Array,
 					stn->location.first_line,
 					location,
 					length,
@@ -288,7 +285,7 @@ static void insertNode(STNode t)
 			}
 			else
 				insertBucketList(stn->attr.ch,
-					typeString[Integer],
+					Integer,
 					stn->location.first_line,
 					location++,
 					0,
@@ -310,7 +307,7 @@ static void insertNode(STNode t)
 					if (constType == stn->childrenNode[0]->nodeType)
 						length = stn->childrenNode[0]->attr.value;
 					insertBucketList(stn->attr.ch,
-						typeString[Array],
+						Array,
 						stn->location.first_line,
 						location++,
 						length,
@@ -318,7 +315,7 @@ static void insertNode(STNode t)
 				}
 				else
 					insertBucketList(stn->attr.ch,
-						typeString[Integer],
+						Integer,
 						stn->location.first_line,
 						location++,
 						0,
@@ -351,7 +348,7 @@ void buildSymtab(STNode syntaxTree)
 {
 	traverse(syntaxTree, insertNode, nullProc, nullProc);
 	BucketList l = st_lookup("main", &syntaxTree->location);
-	if (NULL == l || strcmp(l->type, typeString[Function]) != 0)
+	if (NULL == l || l->type != Function)
 		//程序没有main函数
 		fprintf(stderr, "error: program has no main function.\n");
 	if (TraceAnalyze)
@@ -380,30 +377,28 @@ static void checkNode(STNode t)
 			if (t->childrenNode[0] != NULL)
 			{
 				//带有下标
-				if (strcmp(l->type, typeString[Array]) == 0)
+				if (Array == l->type)
+				{
 					//如果是数组，则检查下标类型
 					if (t->childrenNode[0]->dataType != Integer)
 					{
 						//如果下标类型不是int
 						if (t->childrenNode[0]->dataType != Unknown)
 							invalidConversionError(
-								typeString[t->childrenNode[0]->dataType],
-								typeString[Integer],
+								t->childrenNode[0]->dataType,
+								Integer,
 								&t->childrenNode[0]->location);
 					}
 					else
 						t->dataType = Integer;
+				}
 				else
 					//如果不是数组，则报错
 					arrayError(t->attr.ch, &t->location);
 			}
-			//不带下标
-			else if (strcmp(l->type, typeString[Array]) == 0)
-				t->dataType = Array;
-			else if (strcmp(l->type, typeString[Integer]) == 0)
-				t->dataType = Integer;
-			else if (strcmp(l->type, typeString[Function]) == 0)
-				t->dataType = Function;
+			else
+				//不带下标
+				t->dataType = l->type;
 		}
 	}
 	break;
@@ -414,32 +409,12 @@ static void checkNode(STNode t)
 			if (Integer == leftType&&Integer == rightType)
 				t->dataType = Integer;
 			else if (Integer != leftType)
-				invalidOperandError(typeString[leftType], &t->childrenNode[0]->location);
+				invalidOperandError(leftType, &t->childrenNode[0]->location);
 			else if (Integer != rightType)
-				invalidOperandError(typeString[rightType], &t->childrenNode[1]->location);
+				invalidOperandError(rightType, &t->childrenNode[1]->location);
 		}
 		break;
-	case funDeclaration:
-		/*
-///////////////////
-int fun(){}
- warning: no return statement in function returning non-void
-////////////////////////
-void test(){}
-int fun(){return test();}
-main.cpp:14:13: error: void value not ignored as it ought to be
-   14 |     return f();}
-///////////////////////////////////////
-		int fun(){return;}
-		main.cpp:9:4: error: return-statement with no value, in function returning 'int' [-fpermissive]
-	9 |    return ;
-/////////////////////////////////
-	void fun(){return 1;}
-	main.cpp:9:16: error: return-statement with a value, in function returning 'void' [-fpermissive]
-	9 |         return 1;
-*/
 
-		break;
 	case funCall:
 	{
 		if (strcmp(t->attr.ch, func_input) == 0) {
@@ -454,21 +429,21 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 			if (NULL == p)
 				//参数太少
 				argumentNumberError("few", &t->location);
-			else if (defaultType == p->nodeType 
-				&& p->brotherNode[0] != NULL 
-				&& p->brotherNode[0]->nodeType!=opType)
+			else if (defaultType == p->nodeType
+				&& p->brotherNode[0] != NULL
+				&& p->brotherNode[0]->nodeType != opType)
 				//参数太多
 				argumentNumberError("many", &t->location);
 			else if (p->dataType != Integer)
 				//参数类型不是int
 				invalidConversionError(
-					typeString[p->dataType],
-					typeString[Integer],
+					p->dataType,
+					Integer,
 					&p->location);
 			break;
 		}
 		BucketList bl = st_lookup(t->attr.ch, &t->location);
-		if (bl != NULL && strcmp(bl->type, typeString[Function]) == 0)
+		if (bl != NULL && Function == bl->type)
 		{
 			t->dataType = bl->attr.info.returnType;
 			PL pl = bl->attr.info.params;
@@ -503,8 +478,8 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 			while (args != NULL && pl != NULL) {
 				if (pl->type != Void && args->type != pl->type)
 					invalidConversionError(
-						typeString[args->type],
-						typeString[pl->type],
+						args->type,
+						pl->type,
 						&locs->loc);
 				args = args->next;
 				locs = loc->next;
@@ -529,9 +504,9 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 		if (leftType != Unknown && rightType != Unknown)
 		{
 			if (leftType != Integer)
-				assignmentError(typeString[leftType], &t->childrenNode[0]->location);
+				assignmentError(leftType, &t->childrenNode[0]->location);
 			else if (rightType != Integer)
-				invalidConversionError(typeString[rightType], typeString[leftType], &t->childrenNode[1]->location);
+				invalidConversionError(rightType, leftType, &t->childrenNode[1]->location);
 			else
 				t->dataType = Integer;
 		}
@@ -543,8 +518,8 @@ main.cpp:14:13: error: void value not ignored as it ought to be
 	case whileStmt:
 		if (Integer != t->childrenNode[0]->dataType)
 			invalidConversionError(
-				typeString[t->childrenNode[0]->dataType],
-				typeString[Integer],
+				t->childrenNode[0]->dataType,
+				Integer,
 				&t->childrenNode[0]->location);
 		break;
 	case returnStmt:

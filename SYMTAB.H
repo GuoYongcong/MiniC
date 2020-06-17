@@ -9,7 +9,7 @@
 #ifndef _SYMTAB_H_
 #define _SYMTAB_H_
 #include "globals.h"
-void insertBucketList(char *name, char *type, int lineno, int loc, int len, STNode t);
+void insertBucketList(char *name, Type type, int lineno, int loc, int len, STNode t);
 
 void insertLineList(BucketList l, int lineno);
 

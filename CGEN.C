@@ -67,7 +67,7 @@ static bool isFuncParam(BucketList list) {
 	return (list->memloc >= start) && (list->memloc <= start + total - 1);
 }
 //gen关系操作符
-static void genRelop(const char * code, const char * op){
+static void genRelop(const char * code, const char * op) {
 	emitRO("SUB", ac, ac1, ac, op);
 	emitRM(code, ac, 2, pc, "br if true");
 	emitRM("LDC", ac, 0, ac, "false case");
@@ -97,7 +97,7 @@ static void cGen(STNode  tree)
 			break;
 		case varType:
 			list = st_lookup(tree->attr.ch, &tree->location);
-			if (strcmp(list->type, typeString[Integer]) == 0) {
+			if (Integer == list->type) {
 				//int类型变量
 				emitComment("-> Id");
 				emitRM("LD", ac, list->memloc, gp, "load id value");
@@ -209,7 +209,7 @@ static void cGen(STNode  tree)
 				tree->childrenNode[0]->attr.ch,
 				&tree->childrenNode[0]->location);
 
-			if (strcmp(list->type, typeString[Integer]) == 0) {
+			if (Integer == list->type) {
 				//int类型变量
 				emitComment("-> Id");
 				emitRM("ST", ac, list->memloc, gp, "assign: store value");
