@@ -56,7 +56,7 @@ typedef enum {
 
 	opLDM,
 	opLDSR,
-	opSTM,		
+	opSTM,
 	opSTC,		/* MM		sMem[reg[r]] = d ;reg(s) is ignored*/
 	opMMLim,
 
@@ -104,7 +104,7 @@ const char * opCodeTab[]
 = { "HALT","IN","OUT","ADD","SUB","MUL","DIV","????",
 /* RR opcodes */
 "LD","LDR","ST","STR","????", /* RM opcodes */
-"LDM","LDSR","STM","STC",	/* MM opcodes */
+"LDM","LDSR","STM","STC","????",	/* MM opcodes */
 "LDA","LDC","JLT","JLE","JGT","JGE","JEQ","JNE","????"
 /* RA opcodes */
 };
@@ -469,11 +469,18 @@ STEPRESULT stepTM(void)
 		}
 		break;
 	}
-	case opLDSR: reg[r] = sMem[reg[s]]; break;
+	case opLDSR:
+	{
+		reg[r] = sMem[--reg[s]]; 
+		sMem[reg[s]] = 0;
+		break;
+	}
 	case opSTM: {
 		int end = sMem[--reg[s]];
+		sMem[reg[s]] = 0;
 		int total = sMem[--reg[s]];
-		for (int i = end; i > end-total; i--) {
+		sMem[reg[s]] = 0;
+		for (int i = end; i > end - total; i--) {
 			dMem[i] = sMem[--reg[s]];
 			sMem[reg[s]] = 0;
 		}

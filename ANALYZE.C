@@ -275,7 +275,7 @@ static void insertNode(STNode t)
 			if (stn->childrenNode[0] != NULL)
 			{
 				//数组
-				int length = 0;
+				int length = 1;
 				if (constType == stn->childrenNode[0]->nodeType)
 					length = stn->childrenNode[0]->attr.value;
 				insertBucketList(stn->attr.ch,

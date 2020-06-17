@@ -21,7 +21,39 @@ static int tmpOffset = 0;
 
 //当前函数在符号表中的位置指针
 static BucketList curFuncion = NULL;
-
+//语法树结点列表结构体
+typedef struct TreeNodeList {
+	STNode treenode;
+	struct TreeNodeList * next;
+} *NodeList;
+//获得函数调用的形参列表
+NodeList getArgs(STNode funcall) {
+	funcall = funcall->childrenNode[0];
+	NodeList args = NULL, arg = NULL;
+	while (funcall != NULL && defaultType == funcall->nodeType) {
+		arg = (NodeList)malloc(sizeof(struct TreeNodeList));
+		arg->treenode = funcall->brotherNode[1];
+		arg->next = args;
+		args = arg;
+		funcall = funcall->brotherNode[0];
+	}
+	if (NULL != funcall) {
+		arg = (NodeList)malloc(sizeof(struct TreeNodeList));
+		arg->treenode = funcall;
+		arg->next = args;
+		args = arg;
+	}
+	return args;
+}
+//释放空间
+void freeNodeList(NodeList list) {
+	NodeList l = NULL;
+	while (list != NULL) {
+		l = list;
+		list = list->next;
+		free(l);
+	}
+}
 static void genStmt(STNode tree);
 
 /* prototype for internal recursive code generator */
@@ -180,12 +212,53 @@ static void cGen(STNode  tree)
 			else {
 				//数组
 				emitComment("-> Array");
-				cGen(tree->childrenNode[0]);
-				emitRM("ST", ac, tmpOffset--, mp, "array: push index");
-				emitRM("LDC", ac, list->memloc, 0, "load const");
-				emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-				emitRO("ADD", ac, ac, ac1, "array add index");
-				emitRM("LDR", ac, ac, gp, "load id value");
+				//判断该数组是否为函数形参
+				PL params = curFuncion->attr.info.params;
+				int total = 0;
+				while (params != NULL)
+				{
+					total++;
+					params = params->next;
+				}
+				int start = curFuncion->memloc + 2;
+				if ((list->memloc >= start) && (list->memloc <= start + total - 1))
+				{
+					//该数组是函数形参
+					if (tree->childrenNode[0] != NULL)
+					{
+						//数组某个元素
+						cGen(tree->childrenNode[0]);
+						emitRM("ST", ac, tmpOffset--, mp, "array: push index");
+						emitRM("LDC", ac, list->memloc, 0, "array: load param address");
+						emitRM("LD", ac, 0, ac, "array: load actual address");
+						emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
+						emitRO("ADD", ac, ac, ac1, "array: address add index");
+						emitRM("LDR", ac, ac, gp, "load id value");
+					}
+					else {
+						//数组起始地址
+						emitRM("LDC", ac, list->memloc, 0, "array: load param address");
+						emitRM("LD", ac, 0, ac, "array: load actual address");
+					}
+				}
+				else
+				{
+					//该数组不是函数形参
+					if (tree->childrenNode[0] != NULL)
+					{
+						//数组某个元素
+						cGen(tree->childrenNode[0]);
+						emitRM("ST", ac, tmpOffset--, mp, "array: push index");
+						emitRM("LDC", ac, list->memloc, 0, "array: load address");
+						emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
+						emitRO("ADD", ac, ac, ac1, "array: address add index");
+						emitRM("LDR", ac, ac, gp, "load id value");
+					}
+					else {
+						//数组起始地址
+						emitRM("LDC", ac, list->memloc, 0, "array: load address");
+					}
+				}
 				emitComment("<- Array");
 			}
 			break;
@@ -308,13 +381,23 @@ static void cGen(STNode  tree)
 				emitRO("OUT", ac, 0, 0, "output ac");
 			}
 			else {
+				//传递参数
+				list = st_lookup(tree->attr.ch, &tree->location);
+				NodeList args = getArgs(tree), arg = args;
+				for (int i = 0; arg != NULL; i++)
+				{
+					cGen(arg->treenode);
+					emitRM("ST", ac, list->memloc + 2 + i, gp, "store value");
+					arg = arg->next;
+				}
+				freeNodeList(args);
 				//保存相应局部变量的值
 				if (curFuncion != NULL) {
 					int i = 0,
 						start = curFuncion->memloc + 2,
 						total = curFuncion->last_memloc - start + 1;
 					currentLoc = emitSkip(0);
-					emitRM("STC", sp, currentLoc, 0, "save current location");
+					emitRM("STC", sp, currentLoc + 9, 0, "save current location");
 					emitRM("LDA", sp, 1, sp, "move stack pointer");
 					emitRM("LDM", start, total, sp, "save local variables");
 					emitRM("LDA", sp, total, sp, "move stack pointer");
@@ -324,7 +407,6 @@ static void cGen(STNode  tree)
 					emitRM("LDA", sp, 1, sp, "move stack pointer");
 				}
 				//跳转到被调用的函数的入口
-				list = st_lookup(tree->attr.ch, &tree->location);
 				emitRM("LD", pc, list->memloc, gp, "load entry to a function");
 			}
 			emitComment("<-function call");
@@ -333,12 +415,12 @@ static void cGen(STNode  tree)
 		case funDeclaration:
 		{
 			bool isMain = (strcmp(tree->attr.ch, "main") == 0);
+			list = st_lookup(tree->attr.ch, &tree->location);
+			curFuncion = list;
 			if (TraceCode) fprintf(code, "* --- Function %s ---\n", tree->attr.ch);
 			if (!isMain)
 			{
 				//存储函数入口
-				list = st_lookup(tree->attr.ch, &tree->location);
-				curFuncion = list;
 				currentLoc = emitSkip(0);
 				emitRM("LDC", ac, currentLoc + 6, 0, "load const");
 				emitRM("ST", ac, list->memloc, gp, "store value");
@@ -361,14 +443,13 @@ static void cGen(STNode  tree)
 				//如果不是main函数，则回到调用该函数的地方
 				emitRM("STM", 0, 0, sp, "recover local variables");
 				emitRM("LDSR", pc, 0, sp, "back to function call");
-				emitRM("LDA", sp, -1, sp, "move stack pointer");
 			}
 			if (!isMain)
 			{
 				//如果不是main函数则跳过
 				currentLoc = emitSkip(0);
 				emitBackup(savedLoc1);
-				emitRM("LDC", ac, 1, 0, "load const");
+				emitRM("LDC", ac, 0, 0, "load const");
 				emitRM_Abs("JEQ", ac, currentLoc, "Jump to end of function");
 				emitRestore();
 			}
@@ -408,7 +489,7 @@ static void cGen(STNode  tree)
 			p1 = tree->childrenNode[0];
 			p2 = tree->childrenNode[1];
 			savedLoc1 = emitSkip(0);
-			emitComment("while: jump after body comes back here");
+			emitComment("while: jmp back to test belongs here");
 			/* generate code for test */
 			cGen(p1);
 			savedLoc2 = emitSkip(1);
@@ -431,7 +512,6 @@ static void cGen(STNode  tree)
 				//如果不是main函数，则回到调用该函数的地方
 				emitRM("STM", 0, 0, sp, "recover local variables");
 				emitRM("LDSR", pc, 0, sp, "back to function call");
-				emitRM("LDA", sp, -1, sp, "move stack pointer");
 			}
 			break;
 		default:
