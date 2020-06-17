@@ -399,9 +399,9 @@ static void cGen(STNode  tree)
 						total = curFuncion->last_memloc - start + 1;
 					emitRM("LDM", start, total, sp, "save local variables");
 					emitRM("LDA", sp, total, sp, "move stack pointer");
-					emitRM("STC", sp, total, 0, "save number of local variables");
+					emitRM("STC", 0, total, sp, "save number of local variables");
 					emitRM("LDA", sp, 1, sp, "move stack pointer");
-					emitRM("STC", sp, curFuncion->last_memloc, 0, "save last memloc");
+					emitRM("STC", 0, curFuncion->last_memloc, sp, "save last memloc");
 					emitRM("LDA", sp, 1, sp, "move stack pointer");
 				}
 				//传递参数
@@ -412,7 +412,7 @@ static void cGen(STNode  tree)
 				tmpOffset += count;
 				freeNodeList(args);
 				currentLoc = emitSkip(0);
-				emitRM("STC", sp, currentLoc + 3, 0, "save current location");
+				emitRM("STC", 0, currentLoc + 3, sp, "save current location");
 				emitRM("LDA", sp, 1, sp, "move stack pointer");
 				//跳转到被调用的函数的入口
 				emitRM("LD", pc, list->memloc, gp, "load entry to a function");

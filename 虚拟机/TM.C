@@ -402,10 +402,9 @@ STEPRESULT stepTM(void)
 		/***********************************/
 		r = currentinstruction.iarg1;
 		s = currentinstruction.iarg3;
-		m = currentinstruction.iarg2 + reg[s];
 		if ((r < 0) || (r > DADDR_SIZE))
 			return srDMEM_ERR;
-		if ((m < 0) || (m > STDDR_SIZE))
+		if ((reg[s] < 0) || (reg[s] > STDDR_SIZE))
 			return srSMEM_ERR;
 		break;
 	case opclRA:
@@ -488,7 +487,8 @@ STEPRESULT stepTM(void)
 		}
 		break;
 	}
-	case opSTC:	sMem[reg[r]] = currentinstruction.iarg2; break;
+	case opSTC:
+		sMem[reg[s]] = currentinstruction.iarg2; break;
 		/*************** RA instructions ********************/
 	case opLDA:    reg[r] = m; break;
 	case opLDC:    reg[r] = currentinstruction.iarg2;   break;
