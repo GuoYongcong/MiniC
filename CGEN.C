@@ -275,7 +275,8 @@ static void cGen(STNode  tree)
 					//右操作数
 					cGen(p2);
 					emitRM("LD", ac1, ++tmpOffset, mp, "op: load left");
-					switch (tree->brotherNode[0]->dataType) {
+					switch (tree->brotherNode[0]->dataType)
+					{
 					case ADD:
 						emitRO("ADD", ac, ac1, ac, "op +");
 						break;
@@ -381,24 +382,21 @@ static void cGen(STNode  tree)
 				emitRO("OUT", ac, 0, 0, "output ac");
 			}
 			else {
-				//传递参数
+				//计算实参
 				list = st_lookup(tree->attr.ch, &tree->location);
 				NodeList args = getArgs(tree), arg = args;
-				for (int i = 0; arg != NULL; i++)
+				int count = 0;
+				for (count = 0; arg != NULL; count++)
 				{
 					cGen(arg->treenode);
-					emitRM("ST", ac, list->memloc + 2 + i, gp, "store value");
+					emitRM("ST", ac, tmpOffset--, mp, "push arg");
 					arg = arg->next;
 				}
-				freeNodeList(args);
 				//保存相应局部变量的值
 				if (curFuncion != NULL) {
 					int i = 0,
 						start = curFuncion->memloc + 2,
 						total = curFuncion->last_memloc - start + 1;
-					currentLoc = emitSkip(0);
-					emitRM("STC", sp, currentLoc + 9, 0, "save current location");
-					emitRM("LDA", sp, 1, sp, "move stack pointer");
 					emitRM("LDM", start, total, sp, "save local variables");
 					emitRM("LDA", sp, total, sp, "move stack pointer");
 					emitRM("STC", sp, total, 0, "save number of local variables");
@@ -406,6 +404,16 @@ static void cGen(STNode  tree)
 					emitRM("STC", sp, curFuncion->last_memloc, 0, "save last memloc");
 					emitRM("LDA", sp, 1, sp, "move stack pointer");
 				}
+				//传递参数
+				for (int i = count; i > 0; i--) {
+					emitRM("LD", ac, tmpOffset + i, mp, "load arg");
+					emitRM("ST", ac, list->memloc + 2 + count - i, gp, "store value");
+				}
+				tmpOffset += count;
+				freeNodeList(args);
+				currentLoc = emitSkip(0);
+				emitRM("STC", sp, currentLoc + 3, 0, "save current location");
+				emitRM("LDA", sp, 1, sp, "move stack pointer");
 				//跳转到被调用的函数的入口
 				emitRM("LD", pc, list->memloc, gp, "load entry to a function");
 			}
@@ -441,8 +449,7 @@ static void cGen(STNode  tree)
 				emitRO("HALT", 0, 0, 0, "");
 			else {
 				//如果不是main函数，则回到调用该函数的地方
-				emitRM("STM", 0, 0, sp, "recover local variables");
-				emitRM("LDSR", pc, 0, sp, "back to function call");
+				emitRM("STM", pc, 0, sp, "recover local variables and back to function call");
 			}
 			if (!isMain)
 			{
@@ -510,8 +517,9 @@ static void cGen(STNode  tree)
 			emitComment("<-return");
 			if (strcmp(curFuncion->name, "main") != 0) {
 				//如果不是main函数，则回到调用该函数的地方
-				emitRM("STM", 0, 0, sp, "recover local variables");
-				emitRM("LDSR", pc, 0, sp, "back to function call");
+				emitRM("STM", pc, 0, sp, "recover local variables and back to function call");
+				/*emitRM("STM", 0, 0, sp, "recover local variables");
+				emitRM("LDSR", pc, 0, sp, "back to function call");*/
 			}
 			break;
 		default:

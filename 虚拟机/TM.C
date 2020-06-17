@@ -471,11 +471,13 @@ STEPRESULT stepTM(void)
 	}
 	case opLDSR:
 	{
-		reg[r] = sMem[--reg[s]]; 
+		reg[r] = sMem[--reg[s]];
 		sMem[reg[s]] = 0;
 		break;
 	}
 	case opSTM: {
+		reg[r] = sMem[--reg[s]];
+		sMem[reg[s]] = 0;
 		int end = sMem[--reg[s]];
 		sMem[reg[s]] = 0;
 		int total = sMem[--reg[s]];

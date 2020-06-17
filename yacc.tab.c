@@ -1407,70 +1407,70 @@ int yywrap(){
  * 参数个数为3时，argv[1]为输入文件，argv[2]为输出文件
  * &@return 返回值为0，正常退出；返回值为1，无法打开待分析的文件。
  */
-int main(int argc, char* argv[]) {
-
-	FILE *fin = 0, *fout = 0;
-	code = stdout;
-    if (argc > 1) {
-        fin = fopen(argv[1], "r");
-        if (!fin) {
-           perror(argv[1]);
-           return 1;
-        }
-        if(argc > 2){
-            fout = fopen(argv[2], "w");
-			if(fout){
-				yyout = fout;
-				code = fout;
-			}
-			if(argc>3){
-				code = fopen(argv[3], "w");
-				if(!code)
-					code = stdout;
-			}
-		}
-    }
-    else{
-		//printf("input and output filename:");
-		char s1[100], s2[100], s3[100];
-		//scanf("%s %s %s", s1, s2, s3);
-		strcpy(s1,"input.txt");
-		strcpy(s2,"output.txt");
-		strcpy(s3,"codefile.tm");
-		printf("%s,%s\n",s1,s2,s3);
-		fin = fopen(s1, "r");
-		if (!fin) {
-			perror(s1);
-			return 1;
-		}
-		fout = fopen(s2, "w");
-		if(fout){
-            yyout = fout;
-		}
-		code = fopen(s3, "w");
-		if(!code)
-			code = stdout;
-	}
-	//从头开始分析fin文件
-	yyrestart(fin);
-	//开始分析
-	yyparse();
-	//打印语法树
-	printTree(treeRoot);
-	//构建、打印符号表
-	buildSymtab(treeRoot);
-	if(!Error)
-		//类型检查
-		typeCheck(treeRoot);
-	if(!Error)
-		//打印中间代码
-		codeGen(treeRoot,"codeFile");
-	//关闭输入输出文件
-	fclose(fin);
-	if (fout)
-		fclose(fout);
-	if(code)
-		fclose(code);
-    system("pause");
-    return 0;
-}
+//int main(int argc, char* argv[]) {
+//
+//	FILE *fin = 0, *fout = 0;
+//	code = stdout;
+//    if (argc > 1) {
+//        fin = fopen(argv[1], "r");
+//        if (!fin) {
+//           perror(argv[1]);
+//           return 1;
+//        }
+//        if(argc > 2){
+//            fout = fopen(argv[2], "w");
+//			if(fout){
+//				yyout = fout;
+//				code = fout;
+//			}
+//			if(argc>3){
+//				code = fopen(argv[3], "w");
+//				if(!code)
+//					code = stdout;
+//			}
+//		}
+//    }
+//    else{
+//		//printf("input and output filename:");
+//		char s1[100], s2[100], s3[100];
+//		//scanf("%s %s %s", s1, s2, s3);
+//		strcpy(s1,"input.txt");
+//		strcpy(s2,"output.txt");
+//		strcpy(s3,"codefile.tm");
+//		printf("%s,%s\n",s1,s2,s3);
+//		fin = fopen(s1, "r");
+//		if (!fin) {
+//			perror(s1);
+//			return 1;
+//		}
+//		fout = fopen(s2, "w");
+//		if(fout){
+//            yyout = fout;
+//		}
+//		code = fopen(s3, "w");
+//		if(!code)
+//			code = stdout;
+//	}
+//	//从头开始分析fin文件
+//	yyrestart(fin);
+//	//开始分析
+//	yyparse();
+//	//打印语法树
+//	printTree(treeRoot);
+//	//构建、打印符号表
+//	buildSymtab(treeRoot);
+//	if(!Error)
+//		//类型检查
+//		typeCheck(treeRoot);
+//	if(!Error)
+//		//打印中间代码
+//		codeGen(treeRoot,"codeFile");
+//	//关闭输入输出文件
+//	fclose(fin);
+//	if (fout)
+//		fclose(fout);
+//	if(code)
+//		fclose(code);
+//    system("pause");
+//    return 0;
+//}
