@@ -26,8 +26,8 @@
 
 //结点内容联合体定义
 typedef union {
-    int value;
-    char *ch;
+    int value; //NUM的值
+    char *ch; //id、操作符、关键字的字符串
 } Val;
 
 //结点类型定义

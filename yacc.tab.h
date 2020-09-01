@@ -1,7 +1,7 @@
 typedef union{
-    int value;
-    char* ch;
-    struct Node* node;
+    int value; //NUM的值
+    char* ch; //id、操作符、关键字的字符串
+    STNode node; //语法树结点
 } YYSTYPE;
 
 #ifndef YYLTYPE

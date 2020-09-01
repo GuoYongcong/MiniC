@@ -75,9 +75,6 @@ static void genRelop(const char * code, const char * op) {
 	emitRM("LDC", ac, 1, ac, "true case");
 }
 
-/* prototype for internal recursive code generator */
-static void cGen(STNode  tree);
-
 /* Procedure cGen recursively generates code by
  * tree traversal
  */
@@ -106,44 +103,27 @@ static void cGen(STNode  tree)
 			else {
 				//数组
 				emitComment("-> Array");
-				if (isFuncParam(list))
-				{
-					//该数组是函数形参
-					if (tree->childrenNode[0] != NULL)
-					{
-						//数组某个元素
-						cGen(tree->childrenNode[0]);
-						emitRM("ST", ac, tmpOffset--, mp, "array: push index");
-						emitRM("LDC", ac, list->memloc, 0, "array: load param address");
-						emitRM("LD", ac, 0, ac, "array: load actual address");
-						emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-						emitRO("ADD", ac, ac, ac1, "array: address add index");
-						emitRM("LDR", ac, ac, gp, "load id value");
-					}
-					else {
-						//数组起始地址
-						emitRM("LDC", ac, list->memloc, 0, "array: load param address");
-						emitRM("LD", ac, 0, ac, "array: load actual address");
-					}
-				}
-				else
-				{
-					//该数组不是函数形参
-					if (tree->childrenNode[0] != NULL)
-					{
-						//数组某个元素
-						cGen(tree->childrenNode[0]);
-						emitRM("ST", ac, tmpOffset--, mp, "array: push index");
-						emitRM("LDC", ac, list->memloc, 0, "array: load address");
-						emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
-						emitRO("ADD", ac, ac, ac1, "array: address add index");
-						emitRM("LDR", ac, ac, gp, "load id value");
-					}
-					else {
-						//数组起始地址
-						emitRM("LDC", ac, list->memloc, 0, "array: load address");
-					}
-				}
+                bool isParam = isFuncParam(list);
+                if (tree->childrenNode[0] != NULL)
+                {
+                    //数组某个元素
+                    cGen(tree->childrenNode[0]);
+                    emitRM("ST", ac, tmpOffset--, mp, "array: push index");
+                    emitRM("LDC", ac, list->memloc, 0, "array: load address");
+                    if (isParam)
+                        //该数组是函数形参
+                        emitRM("LD", ac, 0, ac, "array: load actual address");
+                    emitRM("LD", ac1, ++tmpOffset, mp, "array: load index");
+                    emitRO("ADD", ac, ac, ac1, "array: address add index");
+                    emitRM("LDR", ac, ac, gp, "load id value");
+                }
+                else {
+                    //数组起始地址
+                    emitRM("LDC", ac, list->memloc, 0, "array: load address");
+                    if (isParam)
+                        //该数组是函数形参
+                        emitRM("LD", ac, 0, ac, "array: load actual address");
+                }
 				emitComment("<- Array");
 			}
 			break;
@@ -310,10 +290,11 @@ static void cGen(STNode  tree)
 			}
 			if (!isMain)
 			{
-				//如果不是main函数则跳过
+				//如果不是main函数则跳过函数体
 				savedLoc1 = emitSkip(2);
 				emitComment("Jump to end of function belongs here");
 			}
+            //gen函数体
 			cGen(tree->childrenNode[2]);
 			if (TraceCode) fprintf(code, "* --- End of Function %s ---\n", tree->attr.ch);
 			if (isMain)
@@ -325,7 +306,7 @@ static void cGen(STNode  tree)
 			}
 			if (!isMain)
 			{
-				//如果不是main函数则跳过
+				//如果不是main函数则跳过函数体
 				currentLoc = emitSkip(0);
 				emitBackup(savedLoc1);
 				emitRM("LDC", ac, 0, 0, "load const");
@@ -390,8 +371,6 @@ static void cGen(STNode  tree)
 			if (strcmp(curFuncion->name, "main") != 0) {
 				//如果不是main函数，则回到调用该函数的地方
 				emitRM("STM", pc, 0, sp, "recover local variables and back to function call");
-				/*emitRM("STM", 0, 0, sp, "recover local variables");
-				emitRM("LDSR", pc, 0, sp, "back to function call");*/
 			}
 			break;
 		default:
